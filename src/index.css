@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif: "Cormorant Garamond", Georgia, Cambria, "Times New Roman", Times, serif;
+    --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #0B0D0E;
+    color: #F7F5F1;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-serif);
+  }
+}
+
+/* Custom refined luxury scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0D0E;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #232A2D;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A9875A;
+}
+
+/* Subtle architectural grid pattern */
+.bg-subtle-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(169, 135, 90, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(169, 135, 90, 0.03) 1px, transparent 1px);
+}
+
+/* Luxury card glow */
+.luxury-glow {
+  box-shadow: 0 0 50px -10px rgba(169, 135, 90, 0.08);
+}
+
+.luxury-border {
+  border: 1px solid rgba(169, 135, 90, 0.18);
+}
+
+.luxury-border-active {
+  border: 1px solid #A9875A;
+  box-shadow: 0 0 25px rgba(169, 135, 90, 0.2);
+}
+
+/* Swoele & sensuele verfijnde sfeeranimaties */
+@keyframes sensual-pulse {
+  0%, 100% {
+    opacity: 0.22;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes candlelight-flicker {
+  0%, 100% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 20px rgba(225, 29, 72, 0.25));
+  }
+  25% {
+    opacity: 0.72;
+    filter: drop-shadow(0 0 15px rgba(217, 119, 6, 0.2));
+  }
+  50% {
+    opacity: 0.95;
+    filter: drop-shadow(0 0 28px rgba(225, 29, 72, 0.35));
+  }
+  75% {
+    opacity: 0.80;
+    filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.25));
+  }
+}
+
+.animate-sensual-pulse {
+  animation: sensual-pulse 7s ease-in-out infinite;
+}
+
+.animate-candlelight {
+  animation: candlelight-flicker 5s ease-in-out infinite;
+}
+
+.sensual-gradient-bg {
+  background: radial-gradient(circle at 50% 15%, rgba(169, 135, 90, 0.16) 0%, rgba(225, 29, 72, 0.08) 35%, rgba(11, 13, 14, 0.95) 75%);
+}
+
+.sensual-velvet-glow {
+  background: radial-gradient(ellipse at center, rgba(136, 19, 55, 0.22) 0%, rgba(169, 135, 90, 0.12) 40%, transparent 70%);
+}
+
+.sensual-card {
+  background: linear-gradient(145deg, rgba(26, 16, 20, 0.88) 0%, rgba(14, 16, 18, 0.96) 100%);
+  border: 1px solid rgba(169, 135, 90, 0.25);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.7), 0 0 35px -12px rgba(225, 29, 72, 0.15);
+}
+
+.sensual-card:hover {
+  border-color: rgba(225, 29, 72, 0.5);
+  box-shadow: 0 22px 50px -10px rgba(0, 0, 0, 0.85), 0 0 40px -8px rgba(225, 29, 72, 0.3);
+}
+
+.sensual-pill {
+  background: linear-gradient(90deg, rgba(169, 135, 90, 0.15) 0%, rgba(225, 29, 72, 0.15) 100%);
+  border: 1px solid rgba(225, 29, 72, 0.35);
+}
+
