@@ -3,13 +3,14 @@ import { EarlyAccessLead, DigitalReceipt, PaymentMethod } from '../types';
 export interface EmailDispatchResult {
   success: boolean;
   messageId?: string;
-  deliveredTo: string;
+  recipientEmail: string;
   receiptNumber: string;
   reservationCode: string;
   timestamp: string;
   receipt: DigitalReceipt;
   emailHtml: string;
-  deliveryMode: 'smtp' | 'simulated';
+  deliveryMode: 'resend' | 'simulated' | 'failed';
+  error?: string;
 }
 
 /**
@@ -210,12 +211,13 @@ export function buildReservationEmailHtml(receipt: DigitalReceipt): string {
 }
 
 /**
- * Sends or simulates sending the formal reservation confirmation and receipt
+ * Sends the formal reservation confirmation or requests an explicit development preview.
  */
 export async function sendReservationConfirmation(
   lead: EarlyAccessLead,
   paymentMethod: PaymentMethod = 'iDEAL',
-  customTransactionId?: string
+  customTransactionId?: string,
+  options: { dryRun?: boolean } = {}
 ): Promise<EmailDispatchResult> {
   const receipt = generateReservationReceipt(lead, paymentMethod, customTransactionId);
   const emailHtml = buildReservationEmailHtml(receipt);
@@ -229,37 +231,38 @@ export async function sendReservationConfirmation(
         recipientEmail: lead.email,
         recipientName: lead.firstName,
         receipt,
-        emailHtml
+        emailHtml,
+        ...(options.dryRun ? { dryRun: true } : {})
       })
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        success: true,
-        messageId: data.messageId || `msg_${Date.now()}`,
-        deliveredTo: lead.email,
-        receiptNumber: receipt.receiptNumber,
-        reservationCode: receipt.reservationCode,
-        timestamp,
-        receipt,
-        emailHtml,
-        deliveryMode: data.mode === 'smtp' ? 'smtp' : 'simulated'
-      };
-    }
-  } catch {
-    // Graceful fallback for local development or disconnected backend
-  }
+    const data = await response.json().catch(() => ({}));
+    const acceptedByResend = response.ok && data.success === true && data.mode === 'resend';
+    const simulated = response.ok && data.success === false && data.mode === 'simulated';
 
-  return {
-    success: true,
-    messageId: `sim_msg_${Date.now()}`,
-    deliveredTo: lead.email,
-    receiptNumber: receipt.receiptNumber,
-    reservationCode: receipt.reservationCode,
-    timestamp,
-    receipt,
-    emailHtml,
-    deliveryMode: 'simulated'
-  };
+    return {
+      success: acceptedByResend,
+      ...(acceptedByResend && typeof data.messageId === 'string' ? { messageId: data.messageId } : {}),
+      recipientEmail: lead.email,
+      receiptNumber: receipt.receiptNumber,
+      reservationCode: receipt.reservationCode,
+      timestamp,
+      receipt,
+      emailHtml,
+      deliveryMode: acceptedByResend ? 'resend' : simulated ? 'simulated' : 'failed',
+      ...(!acceptedByResend && !simulated ? { error: data.error || 'Email was not accepted by the provider.' } : {})
+    };
+  } catch (error) {
+    return {
+      success: false,
+      recipientEmail: lead.email,
+      receiptNumber: receipt.receiptNumber,
+      reservationCode: receipt.reservationCode,
+      timestamp,
+      receipt,
+      emailHtml,
+      deliveryMode: 'failed',
+      error: error instanceof Error ? error.message : 'Email request failed.'
+    };
+  }
 }

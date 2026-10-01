@@ -13,7 +13,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { DigitalReceipt } from '../types';
-import { sendReservationConfirmation } from '../services/emailService';
+import { buildReservationEmailHtml } from '../services/emailService';
 import { exportReceiptToDrive } from '../googleDrive';
 
 interface DigitalReceiptModalProps {
@@ -60,18 +60,26 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({ receip
     setIsResending(true);
     setResendStatus(null);
     try {
-      await fetch('/api/send-reservation-receipt', {
+      const response = await fetch('/api/send-reservation-receipt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipientEmail: customEmail,
           recipientName: receipt.customerName,
-          receipt
+          receipt,
+          emailHtml: buildReservationEmailHtml(receipt)
         })
       });
-      setResendStatus(`E-mail succesvol verzonden naar ${customEmail}!`);
+      const result = await response.json().catch(() => ({}));
+      if (response.ok && result.success === true && result.mode === 'resend') {
+        setResendStatus(`Resend heeft de e-mail aangeboden voor verzending naar ${customEmail}; bezorging is nog niet bevestigd.`);
+      } else if (response.ok && result.mode === 'simulated') {
+        setResendStatus(`Preview klaar voor ${customEmail}; er is geen e-mail verzonden.`);
+      } else {
+        setResendStatus(`E-mail niet verzonden naar ${customEmail}. ${result.error || 'Controleer de Resend-configuratie.'}`);
+      }
     } catch {
-      setResendStatus(`Bevestiging en digitaal bewijs opnieuw aangemaakt voor ${customEmail}.`);
+      setResendStatus(`E-mail niet verzonden naar ${customEmail}. Controleer de verbinding en Resend-configuratie.`);
     } finally {
       setIsResending(false);
       setTimeout(() => setResendStatus(null), 4000);

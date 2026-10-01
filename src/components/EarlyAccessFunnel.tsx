@@ -29,7 +29,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { saveEarlyAccessLead, getEarlyAccessLeads, recordLeadDepositPayment } from '../services/leadStorage';
+import { saveEarlyAccessLead, getEarlyAccessLeads, recordLeadDepositPayment, recordLeadEmailStatus } from '../services/leadStorage';
 import { EarlyAccessLead, PaymentMethod, DigitalReceipt } from '../types';
 import { sendReservationConfirmation, generateReservationReceipt } from '../services/emailService';
 import { DigitalReceiptModal } from './DigitalReceiptModal';
@@ -79,7 +79,7 @@ export const EarlyAccessFunnel: React.FC<EarlyAccessFunnelProps> = ({
   // Step 5 receipt & email delivery state
   const [activeReceipt, setActiveReceipt] = useState<DigitalReceipt | null>(null);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
-  const [emailDeliveryStatus, setEmailDeliveryStatus] = useState<'sending' | 'delivered' | 'ready'>('sending');
+  const [emailDeliveryStatus, setEmailDeliveryStatus] = useState<'sending' | 'sent' | 'simulated' | 'failed' | 'ready'>('sending');
   const [emailDeliveryMessage, setEmailDeliveryMessage] = useState<string>('');
 
   // Live community counter
@@ -173,8 +173,10 @@ export const EarlyAccessFunnel: React.FC<EarlyAccessFunnelProps> = ({
         reservationCode: resCode,
         receiptNumber: receiptNum,
         depositAmount: 50,
-        emailDeliveryStatus: 'delivered'
+        emailDeliveryStatus: 'pending'
       });
+
+      let completedLead = updatedLead || createdLead;
 
       if (updatedLead) {
         setCreatedLead(updatedLead);
@@ -195,11 +197,33 @@ export const EarlyAccessFunnel: React.FC<EarlyAccessFunnelProps> = ({
           isSkippingPayment ? 'Bankoverschrijving' : selectedPaymentMethod, 
           txnId
         );
-        setEmailDeliveryStatus('delivered');
-        setEmailDeliveryMessage(`Officiële reserveringsbevestiging & digitaal aankoopbewijs direct verzonden naar ${email.trim()}!`);
-      } catch {
-        setEmailDeliveryStatus('delivered');
-        setEmailDeliveryMessage(`Officiële bevestiging gereed en gekoppeld aan ${email.trim()}.`);
+        const status = emailResult.success
+          ? 'sent'
+          : emailResult.deliveryMode === 'simulated' ? 'simulated' : 'failed';
+        const leadWithEmailStatus = recordLeadEmailStatus(createdLead.id, status);
+        if (leadWithEmailStatus) {
+          completedLead = leadWithEmailStatus;
+          setCreatedLead(leadWithEmailStatus);
+        }
+
+        if (emailResult.success) {
+          setEmailDeliveryStatus('sent');
+          setEmailDeliveryMessage(`Resend heeft de bevestiging aangeboden voor verzending naar ${email.trim()}. Bezorging in de inbox is nog niet bevestigd.`);
+        } else if (emailResult.deliveryMode === 'simulated') {
+          setEmailDeliveryStatus('simulated');
+          setEmailDeliveryMessage(`Preview klaar voor ${email.trim()}; er is geen e-mail verzonden.`);
+        } else {
+          setEmailDeliveryStatus('failed');
+          setEmailDeliveryMessage(`E-mail niet verzonden naar ${email.trim()}. ${emailResult.error || 'Controleer de Resend-configuratie.'}`);
+        }
+      } catch (error) {
+        const leadWithEmailStatus = recordLeadEmailStatus(createdLead.id, 'failed');
+        if (leadWithEmailStatus) {
+          completedLead = leadWithEmailStatus;
+          setCreatedLead(leadWithEmailStatus);
+        }
+        setEmailDeliveryStatus('failed');
+        setEmailDeliveryMessage(`E-mail niet verzonden naar ${email.trim()}.`);
       }
 
       setClaimedCount(prev => prev + 1);
@@ -218,8 +242,8 @@ export const EarlyAccessFunnel: React.FC<EarlyAccessFunnelProps> = ({
         // Ignore if confetti not supported
       }
 
-      if (onSuccess && updatedLead) {
-        onSuccess(updatedLead);
+      if (onSuccess && completedLead) {
+        onSuccess(completedLead);
       }
     }, 850);
   };
@@ -781,7 +805,7 @@ export const EarlyAccessFunnel: React.FC<EarlyAccessFunnelProps> = ({
               </div>
 
               {/* Email Delivery Status Banner */}
-              <div className="max-w-xl mx-auto p-3.5 rounded-xl bg-[#0B0D0E] border border-emerald-500/40 flex items-center justify-center gap-2.5 text-xs font-mono text-emerald-400">
+              <div className={`max-w-xl mx-auto p-3.5 rounded-xl bg-[#0B0D0E] flex items-center justify-center gap-2.5 text-xs font-mono ${emailDeliveryStatus === 'sent' ? 'border border-emerald-500/40 text-emerald-400' : emailDeliveryStatus === 'failed' ? 'border border-red-500/40 text-red-300' : 'border border-amber-500/40 text-amber-300'}`}>
                 <Mail className="w-4 h-4 shrink-0 text-[#A9875A]" />
                 <span className="text-left font-medium">
                   {emailDeliveryMessage || `Officiële welkomstbevestiging & voucherbewijs verzonden naar ${email}!`}

@@ -106,8 +106,8 @@ export function recordLeadDepositPayment(
         reservationCode: paymentInfo.reservationCode,
         receiptNumber: paymentInfo.receiptNumber,
         paidAt: now,
-        emailSentAt: now,
-        emailDeliveryStatus: paymentInfo.emailDeliveryStatus || 'delivered'
+        emailSentAt: paymentInfo.emailDeliveryStatus === 'sent' ? now : undefined,
+        emailDeliveryStatus: paymentInfo.emailDeliveryStatus || 'pending'
       };
       return updatedLead;
     }
@@ -123,6 +123,38 @@ export function recordLeadDepositPayment(
     }).catch(() => {});
   } catch (e) {
     console.error('Failed to record payment', e);
+  }
+
+  return updatedLead;
+}
+
+export function recordLeadEmailStatus(
+  leadId: string,
+  emailDeliveryStatus: NonNullable<EarlyAccessLead['emailDeliveryStatus']>
+): EarlyAccessLead | null {
+  const currentLeads = getEarlyAccessLeads();
+  let updatedLead: EarlyAccessLead | null = null;
+  const now = new Date().toISOString();
+
+  const updated = currentLeads.map(lead => {
+    if (lead.id !== leadId) return lead;
+    updatedLead = {
+      ...lead,
+      emailDeliveryStatus,
+      emailSentAt: emailDeliveryStatus === 'sent' ? now : undefined
+    };
+    return updatedLead;
+  });
+
+  try {
+    localStorage.setItem(EARLY_ACCESS_KEY, JSON.stringify(updated));
+    fetch(`/api/leads/${leadId}/email-status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emailDeliveryStatus })
+    }).catch(() => {});
+  } catch (e) {
+    console.error('Failed to update email status', e);
   }
 
   return updatedLead;

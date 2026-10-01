@@ -45,7 +45,7 @@ export interface EarlyAccessLead {
   receiptNumber?: string;
   paidAt?: string;
   emailSentAt?: string;
-  emailDeliveryStatus?: 'delivered' | 'pending' | 'failed' | 'simulated';
+  emailDeliveryStatus?: 'sent' | 'pending' | 'failed' | 'simulated';
   referralCode?: string;
   referralCount?: number;
   referredBy?: string;
