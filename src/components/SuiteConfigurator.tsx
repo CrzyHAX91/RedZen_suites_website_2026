@@ -1,3 +1,4 @@
+import { PRICE_LABEL, STANDARD_PRICE } from '../data/bookingStatus';
 import React, { useState } from 'react';
 import { PageRoute } from '../types';
 import { Sparkles, Clock, Check, ArrowRight, Flame, Droplets, Wind, Heart, Coffee } from 'lucide-react';
@@ -81,7 +82,7 @@ export const SuiteConfigurator: React.FC<SuiteConfiguratorProps> = ({ onSelectAn
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-serif text-lg text-[#F7F5F1]">Zen One Suite</span>
-              <span className="text-xs font-mono text-[#A9875A]">€200 / 2 uur</span>
+              <span className="text-xs font-mono text-[#A9875A]">{PRICE_LABEL}</span>
             </div>
             <p className="text-xs text-[#A9AAA7] leading-relaxed">
               Minimalistische 2-persoons suite met Finse cederhouten sauna, stortdouche en discrete lounge.
@@ -101,7 +102,7 @@ export const SuiteConfigurator: React.FC<SuiteConfiguratorProps> = ({ onSelectAn
             </span>
             <div className="flex items-center justify-between mb-2">
               <span className="font-serif text-lg text-[#F7F5F1]">Zen Signature Master</span>
-              <span className="text-xs font-mono text-[#A9875A]">€200 / 2 uur</span>
+              <span className="text-xs font-mono text-[#A9875A]">{PRICE_LABEL}</span>
             </div>
             <p className="text-xs text-[#A9AAA7] leading-relaxed">
               Volledige private master wellness met Bio-Sauna, dubbele magnesium spa, infraroodwand & haard.
@@ -206,7 +207,7 @@ export const SuiteConfigurator: React.FC<SuiteConfiguratorProps> = ({ onSelectAn
           onClick={() => onSelectAndNavigate ? onSelectAndNavigate('/early-access') : undefined}
           className="w-full sm:w-auto py-3.5 px-8 rounded-xl bg-gradient-to-r from-[#A9875A] to-[#C5A069] text-[#0B0D0E] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:brightness-110 shadow-lg cursor-pointer transition-all"
         >
-          <span>Claim Jouw Plek Met Deze Voorkeuren</span>
+          <span>Early Access aanvragen</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

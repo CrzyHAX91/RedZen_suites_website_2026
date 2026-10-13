@@ -149,7 +149,7 @@ export const FAQ_ITEMS = [
   },
   {
     question: 'Wat levert Early Access mij op?',
-    answer: 'Als Early Access lid ontvang je direct €50 korting op jouw eerste 2-uurs sessie (€150 i.p.v. €200 voor 2 personen) wanneer je nú reserveert. Daarnaast krijg je 48 uur exclusieve voorrang op de officiële openingskalender en de allereerste primeur over de locatie.'
+    answer: 'Early Access is een vrijblijvende aanvraag. Korting, voorrang, opening en boekingskalender zijn nog niet bevestigd.'
   },
   {
     question: 'Met hoeveel personen kan ik een suite betreden?',

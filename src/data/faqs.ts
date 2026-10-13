@@ -1,3 +1,4 @@
+import { PRICE_LABEL } from './bookingStatus';
 export type FAQCategory = 
   | 'Algemeen'
   | 'Suites'
@@ -90,14 +91,14 @@ export const FAQ_ITEMS_DATA: FAQItem[] = [
     category: 'Boeken en prijzen',
     order: 9,
     question: 'Wat gaat een sessie kosten?',
-    answer: 'De definitieve prijzen zijn nog niet vastgesteld. Via de Early Access-funnel verzamelen we informatie over gastvoorkeuren en prijsperceptie. Early Access-leden ontvangen de uiteindelijke prijzen als eerste.'
+    answer: `Het standaardtarief is ${PRICE_LABEL}. Het eerder genoemde €50 Early Access-voordeel is niet opnieuw bevestigd en wordt niet aangeboden. Extra opties en voorwaarden volgen vóór de boekingsopening.`
   },
   {
     id: 'faq-book-3',
     category: 'Boeken en prijzen',
     order: 10,
     question: 'Hoe lang duurt een sessie?',
-    answer: 'Circa twee uur wordt momenteel onderzocht als belangrijk uitgangspunt. Mogelijk worden later verschillende tijdsloten en verlengingsopties aangeboden.'
+    answer: 'Het standaardtarief geldt voor een sessie van twee uur. Eventuele verlengingsopties volgen vóór de boekingsopening.'
   },
   {
     id: 'faq-book-4',

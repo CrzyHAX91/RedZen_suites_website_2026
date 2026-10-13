@@ -1,3 +1,4 @@
+import { PRICE_LABEL, STANDARD_PRICE } from '../data/bookingStatus';
 import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
@@ -61,7 +62,7 @@ export const SuitesPage: React.FC<SuitesPageProps> = ({ onNavigate }) => {
         developmentBadge="EXCLUSIEF VOOR TWEE"
         backgroundImage="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1600&q=80"
         primaryCTA={{
-          label: 'CLAIM PRIVILEGE TOEGANG (€50 KORTING)',
+          label: 'EARLY ACCESS AANVRAGEN',
           destination: '/early-access',
           icon: 'sparkles',
           id: 'btn-suites-hero-cta'
@@ -149,10 +150,10 @@ export const SuitesPage: React.FC<SuitesPageProps> = ({ onNavigate }) => {
               <div className="text-left lg:text-right shrink-0 space-y-1">
                 <span className="text-xs text-[#A9AAA7] font-mono block">Indicatieve sessieprijs:</span>
                 <span className="text-2xl sm:text-3xl font-serif text-[#F7F5F1] font-semibold">
-                  €200 <span className="text-xs text-[#A9AAA7] font-sans font-normal">/ 2 uur (2 pers.)</span>
+                  {PRICE_LABEL}
                 </span>
                 <span className="block text-xs text-emerald-400 font-mono">
-                  (€150 na €50 Early Access voordeel)
+                  Geen bevestigde Early Access-korting
                 </span>
               </div>
             </div>
@@ -281,10 +282,10 @@ export const SuitesPage: React.FC<SuitesPageProps> = ({ onNavigate }) => {
               <div className="text-left lg:text-right shrink-0 space-y-1">
                 <span className="text-xs text-[#A9AAA7] font-mono block">Indicatieve sessieprijs:</span>
                 <span className="text-2xl sm:text-3xl font-serif text-[#F7F5F1] font-semibold">
-                  €200 <span className="text-xs text-[#A9AAA7] font-sans font-normal">/ 2 uur (optioneel +rituals)</span>
+                  {PRICE_LABEL}
                 </span>
                 <span className="block text-xs text-emerald-400 font-mono">
-                  (€150 na €50 Early Access voordeel)
+                  Geen bevestigde Early Access-korting
                 </span>
               </div>
             </div>
@@ -418,7 +419,7 @@ export const SuitesPage: React.FC<SuitesPageProps> = ({ onNavigate }) => {
               JOIN THE EARLY ACCESS LIST.
             </h2>
             <p className="text-sm sm:text-base text-[#A9AAA7] font-light leading-relaxed">
-              Verzeker je van 48 uur voorrang bij de boekingsopening en ontvang direct €50 introductievoordeel op jouw eerste 2-uurs suitesessie.
+              Vraag vrijblijvend Early Access aan. Opening, boekingskalender en eventuele voordelen zijn nog niet bevestigd.
             </p>
           </div>
 
