@@ -136,10 +136,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Early Access Direct Box */}
           <div className="space-y-3">
             <h4 className="text-xs font-mono uppercase tracking-widest text-[#A9875A] font-semibold">
-              1.000 Leden Limiet
+              Blijf op de hoogte
             </h4>
             <p className="text-xs text-[#A9AAA7] leading-relaxed">
-              Verzeker je van 48u exclusieve voorrang bij de boekingsopening van de allereerste suite.
+              Registreer vrijblijvend je belangstelling. Opening en reserveringen zijn nog niet beschikbaar.
             </p>
             <button
               type="button"
@@ -147,7 +147,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               onClick={() => handleNav('/early-access')}
               className="w-full py-3 px-4 rounded-xl bg-[#15191A] border border-[#A9875A]/40 text-[#F7F5F1] text-xs font-semibold uppercase tracking-wider flex items-center justify-between hover:bg-[#A9875A] hover:text-[#0B0D0E] transition-all cursor-pointer group"
             >
-              <span>Join Funnel</span>
+              <span>Belangstelling registreren</span>
               <ArrowUpRight className="w-4 h-4 text-[#A9875A] group-hover:text-[#0B0D0E]" />
             </button>
           </div>

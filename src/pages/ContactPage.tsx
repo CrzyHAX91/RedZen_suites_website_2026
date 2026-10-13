@@ -16,6 +16,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !message) return;
+    window.location.href = `mailto:info@redzen-suites.nl?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Naam: ${name}\nE-mail: ${email}\n\n${message}`)}`;
     setSubmitted(true);
   };
 
@@ -92,9 +93,9 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               <div className="w-14 h-14 rounded-full bg-[#1C2224] border border-[#A9875A] flex items-center justify-center mx-auto text-[#A9875A]">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
-              <h3 className="text-2xl font-serif text-[#F7F5F1]">Bericht Verzonden</h3>
+              <h3 className="text-2xl font-serif text-[#F7F5F1]">Verstuur je e-mail zelf</h3>
               <p className="text-sm text-[#A9AAA7] max-w-md mx-auto">
-                Dank je wel {name}. Ons team beantwoordt je bericht zo snel mogelijk.
+                Je e-mailprogramma kan een concept openen. Controleer dit en klik daar zelf op verzenden. Deze website heeft geen bericht verstuurd.
               </p>
               <button
                 type="button"
@@ -108,10 +109,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
+                  <label htmlFor="contact-name" className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
                     Naam *
                   </label>
-                  <input
+                  <input id="contact-name"
                     type="text"
                     required
                     value={name}
@@ -122,10 +123,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
+                  <label htmlFor="contact-email" className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
                     E-mailadres *
                   </label>
-                  <input
+                  <input id="contact-email"
                     type="email"
                     required
                     value={email}
@@ -137,10 +138,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
+                <label htmlFor="contact-subject" className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
                   Onderwerp
                 </label>
-                <select
+                <select id="contact-subject"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-[#0B0D0E] border border-white/10 focus:border-[#A9875A] text-sm text-[#F7F5F1] focus:outline-none"
@@ -153,10 +154,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
+                <label htmlFor="contact-message" className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
                   Bericht *
                 </label>
-                <textarea
+                <textarea id="contact-message"
                   rows={4}
                   required
                   value={message}
@@ -171,7 +172,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                 className="w-full py-4 rounded-xl bg-gradient-to-r from-[#A9875A] to-[#C5A069] text-[#0B0D0E] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:brightness-110 shadow-lg cursor-pointer transition-all"
               >
                 <Send className="w-4 h-4" />
-                <span>Verstuur Bericht</span>
+                <span>E-mailconcept maken</span>
               </button>
             </form>
           )}
