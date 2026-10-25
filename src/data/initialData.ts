@@ -1,3 +1,4 @@
+import { PRICE_LABEL, PRICE_NOTICE } from './bookingStatus';
 import { EarlyAccessLead, PropertyLead, InvestorLead } from '../types';
 
 export const INITIAL_LEADS: EarlyAccessLead[] = [
@@ -144,8 +145,8 @@ export const FAQ_ITEMS = [
     answer: 'RedZen Suites is vanaf de basis circulair ontworpen: we gebruiken slimme warmteterugwinning uit afvalwater (greywater heat exchangers), zero-emission warmtepompen, IoT-gestuurde energiebesparende stand-by sauna’s en chemievrije biologische waterdesinfectie (UVC & Ozon). We benutten actieve groene investeringen en overheidssubsidies (MIA/VAMIL & EIA) om deze innovatieve technieken op schaal te realiseren.'
   },
   {
-    question: 'Waarom is het tarief vastgezet op €200 per 2 uur?',
-    answer: 'Het tarief van €200 per 2 uur (voor 2 personen) vormt de gezonde, duurzame basiseenheidsprijs die onze intensieve waterterugwinning, zero-emission energie, biologische hygiëneprocedures en hoogwaardig bio-katoen linnen dekt. Subsidies en groene investeringen versterken hierbij onze capex-investeringen en versnellen de uitrol van nieuwe hubs.'
+    question: 'Wat is het standaardtarief?',
+    answer: `Het standaardtarief is ${PRICE_LABEL}. ${PRICE_NOTICE}`
   },
   {
     question: 'Wat levert Early Access mij op?',

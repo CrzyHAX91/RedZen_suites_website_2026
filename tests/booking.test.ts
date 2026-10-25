@@ -7,8 +7,8 @@ import React from 'react';
 import { EarlyAccessPage } from '../src/pages/EarlyAccessPage';
 
 test('current status shows standard price and denies bookings and unconfirmed discount', () => {
-  assert.equal(PRICE_LABEL, '€200 per 2 uur');
-  assert.deepEqual(bookingView(BOOKING_STATUS), { canReserve: false, offerActive: false, price: 200, primaryLabel: 'Early Access aanvragen' });
+  assert.equal(PRICE_LABEL, '€150 per 2 uur');
+  assert.deepEqual(bookingView(BOOKING_STATUS), { canReserve: false, offerActive: false, price: 150, primaryLabel: 'Early Access aanvragen' });
 });
 test('each operational gate must be explicitly true; phase alone cannot enable bookings', () => {
   const ready = { ...BOOKING_STATUS, phase: 'open' as const, locationConfirmed: true, openingConfirmed: true, calendarReady: true, reservationsApproved: true };
@@ -21,9 +21,9 @@ test('each operational gate must be explicitly true; phase alone cannot enable b
 test('discount requires confirmation, current expiry and terms', () => {
   const offer = { confirmed: true, discount: 50, expiresAt: '2026-12-01', terms: 'One session' };
   const now = new Date('2026-10-13');
-  assert.equal(bookingView({ ...BOOKING_STATUS, offer }, now).price, 150);
-  for (const change of [{ confirmed: false }, { expiresAt: null }, { expiresAt: 'invalid' }, { expiresAt: '2026-10-12' }, { terms: '' }, { discount: -50 }, { discount: 200 }]) {
-    assert.equal(bookingView({ ...BOOKING_STATUS, offer: { ...offer, ...change } }, now).price, 200);
+  assert.equal(bookingView({ ...BOOKING_STATUS, offer }, now).price, 100);
+  for (const change of [{ confirmed: false }, { expiresAt: null }, { expiresAt: 'invalid' }, { expiresAt: '2026-10-12' }, { terms: '' }, { discount: -50 }, { discount: 150 }, { discount: 200 }]) {
+    assert.equal(bookingView({ ...BOOKING_STATUS, offer: { ...offer, ...change } }, now).price, 150);
   }
 });
 const input = { kind: 'interest' as const, name: 'Guest', email: 'guest@example.com', consent: true };
@@ -38,8 +38,8 @@ test('client never treats simulated, HTML, malformed, failed or offline response
 });
 test('application page has distinct labelled actions and no payment, voucher or member dashboard', () => {
   const html = renderToStaticMarkup(React.createElement(EarlyAccessPage, { onNavigate: () => {} }));
-  for (const text of ['€200 per 2 uur', 'Belangstelling registreren', 'Early Access aanvragen', 'interest-email', 'privacy', 'Markerkant 13-10']) assert.ok(html.includes(text));
-  for (const text of ['€150', 'iDEAL', 'Creditcard', 'Demolid selecteren', 'Officiële Reserveringsbevestiging']) assert.ok(!html.includes(text));
+  for (const text of ['€150 per 2 uur', 'Belangstelling registreren', 'Early Access aanvragen', 'interest-email', 'privacy', 'Markerkant 13-10']) assert.ok(html.includes(text));
+  for (const text of ['€200', 'iDEAL', 'Creditcard', 'Demolid selecteren', 'Officiële Reserveringsbevestiging']) assert.ok(!html.includes(text));
 });
 
 test('legacy receipt and email helpers cannot fabricate a paid receipt or delivered email', async () => {
@@ -54,8 +54,8 @@ test('home and suite marketing agree with current price and application status',
   const { SuitesPage } = await import('../src/pages/SuitesPage');
   for (const page of [HomePage, SuitesPage]) {
     const html = renderToStaticMarkup(React.createElement(page, { onNavigate: () => {} }));
-    assert.ok(html.includes('€200 per 2 uur'));
+    assert.ok(html.includes('€150 per 2 uur'));
     assert.ok(html.includes('Early Access aanvragen') || html.includes('EARLY ACCESS AANVRAGEN'));
-    for (const forbidden of ['€150', 'RESERVEER JOUW DATE', 'CLAIM €50', '48u Boekingsvoorsprong']) assert.ok(!html.includes(forbidden));
+    for (const forbidden of ['€200', 'RESERVEER JOUW DATE', 'CLAIM €50', '48u Boekingsvoorsprong']) assert.ok(!html.includes(forbidden));
   }
 });

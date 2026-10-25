@@ -461,7 +461,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               <div className="pt-8 flex items-center justify-between border-t border-white/5 mt-6">
                 <div className="text-xs text-[#A9AAA7]">
-                  Standaardtarief: <span className="text-[#F7F5F1] font-semibold">{PRICE_LABEL}</span> <span className="text-emerald-400 font-mono">(geen bevestigde korting)</span>
+                  Standaardtarief: <span className="text-[#F7F5F1] font-semibold">{PRICE_LABEL}</span> <span className="text-[#CBC8C0]">(geen tijdelijke korting)</span>
                 </div>
                 <button
                   type="button"

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { BOOKING_STATUS, PRICE_LABEL } from '../data/bookingStatus';
-import { InterestKind, submitInterest } from '../services/interestService';
+import { BOOKING_STATUS, PRICE_LABEL, PRICE_NOTICE } from '../data/bookingStatus';
+import { InterestKind, createInterestRequestId, submitInterest } from '../services/interestService';
 export const EarlyAccessFunnel: React.FC = () => {
   const [kind, setKind] = useState<InterestKind>('interest');
   const [name, setName] = useState('');
@@ -18,15 +18,18 @@ export const EarlyAccessFunnel: React.FC = () => {
     lock.current = true; setPending(true); setError('');
     const input = { kind, name: name.trim(), email: email.trim(), consent };
     const fingerprint = JSON.stringify(input);
-    if (attempt.current.fingerprint !== fingerprint) attempt.current = { fingerprint, id: crypto.randomUUID() };
-    try { setReceived(await submitInterest(input, attempt.current.id)); }
-    catch (e) { setError((e as Error).message); }
+    try {
+      if (attempt.current.fingerprint !== fingerprint) attempt.current = { fingerprint, id: createInterestRequestId() };
+      setReceived(await submitInterest(input, attempt.current.id));
+    }
+    catch { setError('Je aanvraag kon niet worden bevestigd. Je invoer blijft staan; probeer later opnieuw.'); }
     finally { lock.current = false; setPending(false); requestAnimationFrame(() => feedback.current?.focus()); }
   }
   const fieldClass = 'mt-2 w-full min-h-12 rounded-xl bg-[#0B0D0E] border border-[#A9875A]/50 p-3 text-[#F7F5F1]';
   return <section aria-labelledby="interest-title" className="max-w-2xl mx-auto rounded-3xl border border-[#A9875A]/40 bg-[#15191A] p-5 sm:p-8 space-y-6 scroll-mt-28">
     <h2 id="interest-title" className="text-3xl font-serif">Blijf betrokken bij RedZen</h2>
     <p className="text-[#CBC8C0]">Standaardtarief: {PRICE_LABEL}. Geen aanbetaling, voucher of gereserveerd tijdslot.</p>
+    <p className="text-sm text-[#CBC8C0]">{PRICE_NOTICE}</p>
     {received ? <div ref={feedback} tabIndex={-1} role="status" className="space-y-3">
       <h3 className="font-serif text-xl">{kind === 'early-access' ? 'Early Access-aanvraag ontvangen' : 'Belangstelling ontvangen'}</h3>
       <p>Referentie: {received}</p><p>Er is geen reservering of betaling bevestigd. Er is geen e-mailverzending bevestigd. Eventuele voordelen en opening volgen pas na bevestiging.</p>

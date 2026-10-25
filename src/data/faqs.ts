@@ -1,4 +1,4 @@
-import { PRICE_LABEL } from './bookingStatus';
+import { PRICE_LABEL, PRICE_NOTICE } from './bookingStatus';
 export type FAQCategory = 
   | 'Algemeen'
   | 'Suites'
@@ -91,7 +91,7 @@ export const FAQ_ITEMS_DATA: FAQItem[] = [
     category: 'Boeken en prijzen',
     order: 9,
     question: 'Wat gaat een sessie kosten?',
-    answer: `Het standaardtarief is ${PRICE_LABEL}. Het eerder genoemde €50 Early Access-voordeel is niet opnieuw bevestigd en wordt niet aangeboden. Extra opties en voorwaarden volgen vóór de boekingsopening.`
+    answer: `Het standaardtarief is ${PRICE_LABEL}. ${PRICE_NOTICE}`
   },
   {
     id: 'faq-book-3',

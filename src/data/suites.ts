@@ -1,4 +1,4 @@
-import { PRICE_LABEL } from './bookingStatus';
+import { PRICE_LABEL, PRICE_NOTICE } from './bookingStatus';
 export interface Suite {
   slug: string;
   name: string;
@@ -51,9 +51,9 @@ export const SUITES_DATA: Suite[] = [
     image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1400&q=80',
     imageAlt: 'Architecturale weergave van een minimalistische privé saunasuite met natuurlijk hout en zacht indirect licht',
     sourceKey: 'suite_zen_one',
-    pricingNote: `Standaardtarief: ${PRICE_LABEL}. Geen bevestigde Early Access-korting.`,
+    pricingNote: `Standaardtarief: ${PRICE_LABEL}. ${PRICE_NOTICE}`,
     capacityText: 'Exclusief voor 2 personen',
-    sessionDuration: '2 tot 3 uur tijdsloten'
+    sessionDuration: '2 uur; verlengingsopties nog niet bevestigd'
   },
   {
     slug: 'zen-signature',
@@ -88,9 +88,9 @@ export const SUITES_DATA: Suite[] = [
     image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1400&q=80',
     imageAlt: 'Architecturaal interieur van een royale wellness suite met spa bad, natuursteen en sfeerverlichting',
     sourceKey: 'suite_zen_signature',
-    pricingNote: `Standaardtarief: ${PRICE_LABEL}. Geen bevestigde Early Access-korting.`,
+    pricingNote: `Standaardtarief: ${PRICE_LABEL}. ${PRICE_NOTICE}`,
     capacityText: 'Exclusief voor 2 personen',
-    sessionDuration: '2.5 tot 4 uur tijdsloten'
+    sessionDuration: '2 uur; verlengingsopties nog niet bevestigd'
   }
 ];
 

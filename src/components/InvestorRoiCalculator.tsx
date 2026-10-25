@@ -1,3 +1,4 @@
+import { STANDARD_PRICE } from '../data/bookingStatus';
 import React, { useState } from 'react';
 import { 
   Calculator, 
@@ -37,9 +38,9 @@ const PRESETS: ScenarioPreset[] = [
     badge: 'Safe Baseline',
     numSuites: 4,
     occupancyRate: 58,
-    avgTicketPrice: 200,
+    avgTicketPrice: STANDARD_PRICE,
     capexPerSuite: 130000,
-    description: 'Voorzichtige aannames met beperkte initiële bezetting tegen het vaste ecologische basistarief van €200/slot versterkt met subsidievoordeel.'
+    description: `Rekenscenario met beperkte bezetting en het huidige basistarief van €${STANDARD_PRICE} per twee uur; geen gerealiseerde resultaten.`
   },
   {
     id: 'base',
@@ -47,9 +48,9 @@ const PRESETS: ScenarioPreset[] = [
     badge: 'Most Likely',
     numSuites: 6,
     occupancyRate: 74,
-    avgTicketPrice: 200,
+    avgTicketPrice: STANDARD_PRICE,
     capexPerSuite: 140000,
-    description: 'Onze gevalideerde benchmark voor een 6-suite hub in stedelijk gebied met €200/slot en autonome turnover.'
+    description: `Hypothetisch rekenscenario voor zes suites met €${STANDARD_PRICE} per twee uur; geen bevestigde locatiecapaciteit of benchmark.`
   },
   {
     id: 'aggressive',
@@ -59,7 +60,7 @@ const PRESETS: ScenarioPreset[] = [
     occupancyRate: 86,
     avgTicketPrice: 225,
     capexPerSuite: 155000,
-    description: 'Hoge benuttingsgraad met €200 basis + premium VIP rituelen en drankarrangementen in toplocaties.'
+    description: `Hypothetisch scenario met hogere ticketwaarde dan het huidige basistarief van €${STANDARD_PRICE}; extra arrangementen zijn niet bevestigd.`
   }
 ];
 
@@ -67,7 +68,7 @@ export const InvestorRoiCalculator: React.FC = () => {
   const [activePreset, setActivePreset] = useState<string>('base');
   const [numSuites, setNumSuites] = useState<number>(6); // 4 to 8
   const [occupancyRate, setOccupancyRate] = useState<number>(74); // 50% to 90%
-  const [avgTicketPrice, setAvgTicketPrice] = useState<number>(200); // fixed €200 base for 2-hr booking
+  const [avgTicketPrice, setAvgTicketPrice] = useState<number>(STANDARD_PRICE); // Current base; scenarios remain hypothetical
   const [capexPerSuite, setCapexPerSuite] = useState<number>(140000); // turnkey build + tech per suite
   const [activeTab, setActiveTab] = useState<'kpi' | 'pnl' | 'cashflow'>('kpi');
   const [selectedHorizonYears, setSelectedHorizonYears] = useState<number>(5);
@@ -359,7 +360,7 @@ Vertrouwelijk investeringsmateriaal onder NDA.`;
           </div>
           <input
             type="range"
-            min={180}
+            min={STANDARD_PRICE}
             max={260}
             step={5}
             value={avgTicketPrice}
@@ -370,8 +371,8 @@ Vertrouwelijk investeringsmateriaal onder NDA.`;
             className="w-full h-1.5 bg-[#15191A] rounded-lg appearance-none cursor-pointer accent-[#A9875A]"
           />
           <div className="flex justify-between text-[10px] text-neutral-500 font-mono">
-            <span>€180 (Subsidie drempel)</span>
-            <span>€200 (Standaard Gevalideerd)</span>
+            <span>€{STANDARD_PRICE} (Standaardtarief)</span>
+            <span>Rekenscenario; geen aanbod</span>
             <span>€260 (VIP + Arrangementen)</span>
           </div>
         </div>

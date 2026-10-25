@@ -153,7 +153,7 @@ export const SuitesPage: React.FC<SuitesPageProps> = ({ onNavigate }) => {
                   {PRICE_LABEL}
                 </span>
                 <span className="block text-xs text-emerald-400 font-mono">
-                  Geen bevestigde Early Access-korting
+                  Standaardtarief; geen tijdelijke korting
                 </span>
               </div>
             </div>
@@ -285,7 +285,7 @@ export const SuitesPage: React.FC<SuitesPageProps> = ({ onNavigate }) => {
                   {PRICE_LABEL}
                 </span>
                 <span className="block text-xs text-emerald-400 font-mono">
-                  Geen bevestigde Early Access-korting
+                  Standaardtarief; geen tijdelijke korting
                 </span>
               </div>
             </div>

@@ -51,7 +51,7 @@ export const ConceptPage: React.FC<ConceptPageProps> = ({ onNavigate }) => {
         developmentBadge="INTIEM SANCTUARIUM"
         backgroundImage="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1600&q=80"
         primaryCTA={{
-          label: 'CLAIM PRIVILEGE TOEGANG (€50 KORTING)',
+          label: 'EARLY ACCESS AANVRAGEN',
           destination: '/early-access',
           icon: 'sparkles',
           id: 'btn-concept-hero-cta'

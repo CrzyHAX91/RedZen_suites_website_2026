@@ -1,7 +1,9 @@
-// Verified business inputs, 13 October 2026. Change through reviewed code only.
-export const STANDARD_PRICE = 200;
+// Owner instruction: €150 (23 October, reaffirmed 25 October 2026).
+// Price approval does not approve location, opening, reservations or payments.
+export const STANDARD_PRICE = 150;
 export const SESSION_HOURS = 2;
 export const PRICE_LABEL = `€${STANDARD_PRICE} per ${SESSION_HOURS} uur`;
+export const PRICE_NOTICE = 'Dit is het standaardtarief, geen tijdelijke korting. Extra opties en voorwaarden volgen vóór de boekingsopening.';
 export interface BookingStatus {
   phase: 'development' | 'opening-confirmed' | 'open';
   locationConfirmed: boolean;
@@ -14,7 +16,7 @@ export interface BookingStatus {
 export const BOOKING_STATUS: BookingStatus = {
   phase: 'development', locationConfirmed: false, openingConfirmed: false,
   calendarReady: false, reservationsApproved: false, earlyAccessApplications: true,
-  offer: { confirmed: false, discount: 50, expiresAt: null, terms: null },
+  offer: { confirmed: false, discount: 0, expiresAt: null, terms: null },
 };
 export function bookingView(status: BookingStatus, now = new Date()) {
   const canReserve = ['opening-confirmed', 'open'].includes(status.phase) &&

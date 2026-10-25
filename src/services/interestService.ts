@@ -1,5 +1,11 @@
 export type InterestKind = 'interest' | 'early-access';
 export interface InterestInput { kind: InterestKind; name: string; email: string; consent: boolean; }
+// HTTP previews may expose getRandomValues but not randomUUID. Never use weak random IDs.
+export function createInterestRequestId(source: Pick<Crypto, 'getRandomValues'> & Partial<Pick<Crypto, 'randomUUID'>> = globalThis.crypto) {
+  if (typeof source?.randomUUID === 'function') return source.randomUUID();
+  if (typeof source?.getRandomValues !== 'function') throw new Error('Veilige aanvraagcode niet beschikbaar.');
+  return Array.from(source.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
+}
 export function validInterest(value: unknown): value is InterestInput {
   if (!value || typeof value !== 'object') return false;
   const v = value as InterestInput;
