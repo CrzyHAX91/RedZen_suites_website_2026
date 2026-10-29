@@ -1,3 +1,5 @@
+import { BookingStatusPanel } from '../components/BookingStatusPanel';
+import { BOOKING_VIEW, PRICE_LABEL } from '../data/bookingStatus';
 import React from 'react';
 import { motion } from 'motion/react';
 import { 
@@ -76,7 +78,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181115]/90 border border-rose-500/40 text-[#E8C58D] text-xs font-mono tracking-widest uppercase shadow-[0_0_25px_rgba(225,29,72,0.2)] backdrop-blur-md"
           >
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            <span>100% DISCREET • INTIEM & PASSIEVOL VOOR TWEE • CLAIM €50 PRIVILEGE</span>
+            <span>INTIEM VOOR TWEE • EERSTE LOCATIE IN ONTWIKKELING</span>
           </motion.div>
 
           {/* Main Hero Headline with cinematic mask & typography lift */}
@@ -134,7 +136,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               className="w-full sm:w-auto py-4 px-8 rounded-xl bg-gradient-to-r from-[#C5A069] via-[#A9875A] to-[#B91C1C] text-[#F7F5F1] font-bold text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_0_35px_rgba(185,28,28,0.4)] cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-rose-200" />
-              <span>RESERVEER JOUW DATE — CLAIM €50 PRIVILEGE</span>
+              <span>{BOOKING_VIEW.primaryLabel}</span>
             </button>
 
             <button
@@ -193,8 +195,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               transition={{ duration: 0.5, delay: 0.76 }}
               className="p-3.5 rounded-xl bg-[#181115]/60 border border-[#A9875A]/40 bg-[#A9875A]/10 shadow-[0_0_15px_rgba(169,135,90,0.15)]"
             >
-              <span className="block font-serif text-lg text-[#E8C58D]">€150 Date Privilege</span>
-              <span className="text-[11px] text-[#F7F5F1]">€50 korting op €200 / 2u</span>
+              <span className="block font-serif text-lg text-[#E8C58D]">{PRICE_LABEL}</span>
+              <span className="text-[11px] text-[#F7F5F1]">Standaardtarief • geen bevestigde aanbieding</span>
             </motion.div>
           </motion.div>
 
@@ -213,12 +215,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             Ontwaak Jouw Verlangen
           </h2>
           <p className="text-sm text-[#CBC8C0]">
-            Kies het ritueel dat jullie connectie verdiept en claim direct jouw pre-launch voucher.
+            Verken de geplande rituelen en registreer vrijblijvend je belangstelling.
           </p>
         </div>
 
         {/* Funnel Component */}
-        <EarlyAccessFunnel id="home-micro-funnel" />
+        <div className="space-y-6"><BookingStatusPanel /><EarlyAccessFunnel /></div>
       </section>
 
       {/* 3. THE REDZEN PHILOSOPHY / CORE PILLARS */}
@@ -459,7 +461,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               <div className="pt-8 flex items-center justify-between border-t border-white/5 mt-6">
                 <div className="text-xs text-[#A9AAA7]">
-                  Pre-launch tarief: <span className="text-[#F7F5F1] font-semibold">€200 / 2u</span> <span className="text-emerald-400 font-mono">(€150 na voucher)</span>
+                  Standaardtarief: <span className="text-[#F7F5F1] font-semibold">{PRICE_LABEL}</span> <span className="text-[#CBC8C0]">(geen tijdelijke korting)</span>
                 </div>
                 <button
                   type="button"
@@ -531,7 +533,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               <div className="pt-8 flex items-center justify-between border-t border-white/5 mt-6">
                 <div className="text-xs text-[#A9AAA7]">
-                  Pre-launch tarief: <span className="text-[#F7F5F1] font-semibold">€200 / 2u</span> <span className="text-emerald-400 font-mono">(Master Suite)</span>
+                  Standaardtarief: <span className="text-[#F7F5F1] font-semibold">{PRICE_LABEL}</span> <span className="text-emerald-400 font-mono">(Master Suite)</span>
                 </div>
                 <button
                   type="button"
@@ -565,10 +567,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-[#A9875A]">
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B0D0E] border border-white/10">
-              <ShieldCheck className="w-4 h-4" /> 1.000 Early Access Caps
+              <ShieldCheck className="w-4 h-4" /> Vrijblijvende aanvraag
             </span>
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B0D0E] border border-white/10">
-              <Clock className="w-4 h-4" /> 48u Boekingsvoorsprong
+              <Clock className="w-4 h-4" /> Opening nog niet bevestigd
             </span>
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B0D0E] border border-white/10">
               <Sparkles className="w-4 h-4" /> Pre-launch Tariefgarantie

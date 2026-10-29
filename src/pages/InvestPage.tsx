@@ -1,3 +1,4 @@
+import { PRICE_LABEL } from '../data/bookingStatus';
 import React, { useState } from 'react';
 import { PageRoute } from '../types';
 import { saveInvestorLead } from '../services/leadStorage';
@@ -147,7 +148,7 @@ export const InvestPage: React.FC<InvestPageProps> = ({ onNavigate }) => {
           </div>
           <h3 className="text-lg font-serif text-[#F7F5F1]">Groene Unit Economics</h3>
           <p className="text-xs text-[#A9AAA7] leading-relaxed">
-            Iedere vierkante meter genereert directe inkomsten via 2-uurs premium tijdsloten (€200 basis), versterkt door tot 35% lagere energiekosten dankzij restwarmtehergebruik.
+            Het huidige standaardtarief is {PRICE_LABEL}. De locatie is in ontwikkeling; omzet en eventuele energiebesparingen zijn nog niet operationeel vastgesteld.
           </p>
         </div>
 

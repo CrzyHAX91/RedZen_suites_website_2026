@@ -90,42 +90,7 @@ export function recordLeadDepositPayment(
     emailDeliveryStatus?: EarlyAccessLead['emailDeliveryStatus'];
   }
 ): EarlyAccessLead | null {
-  const currentLeads = getEarlyAccessLeads();
-  let updatedLead: EarlyAccessLead | null = null;
-  const now = new Date().toISOString();
-
-  const updated = currentLeads.map(lead => {
-    if (lead.id === leadId) {
-      updatedLead = {
-        ...lead,
-        status: 'converted',
-        paymentStatus: 'deposit_paid',
-        depositAmount: paymentInfo.depositAmount,
-        paymentMethod: paymentInfo.paymentMethod,
-        transactionId: paymentInfo.transactionId,
-        reservationCode: paymentInfo.reservationCode,
-        receiptNumber: paymentInfo.receiptNumber,
-        paidAt: now,
-        emailSentAt: now,
-        emailDeliveryStatus: paymentInfo.emailDeliveryStatus || 'delivered'
-      };
-      return updatedLead;
-    }
-    return lead;
-  });
-
-  try {
-    localStorage.setItem(EARLY_ACCESS_KEY, JSON.stringify(updated));
-    fetch(`/api/leads/${leadId}/payment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(paymentInfo)
-    }).catch(() => {});
-  } catch (e) {
-    console.error('Failed to record payment', e);
-  }
-
-  return updatedLead;
+  throw new Error('Betalingen zijn nog niet beschikbaar.');
 }
 
 export function getPropertyLeads(): PropertyLead[] {

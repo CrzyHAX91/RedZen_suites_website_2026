@@ -560,15 +560,12 @@ ${inv.message}`;
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
-                              onClick={() => {
-                                const receipt = generateReservationReceipt(lead, lead.paymentMethod || 'iDEAL', lead.transactionId);
-                                setSelectedReceipt(receipt);
-                              }}
-                              title="Bekijk digitale factuur en reserveringsbewijs"
+                              disabled
+                              title="Betalingsbewijzen zijn nog niet beschikbaar"
                               className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-[#A9875A]/40 bg-[#181E20] hover:bg-[#A9875A] text-[#A9875A] hover:text-[#0B0D0E] text-[11px] font-mono transition-all cursor-pointer"
                             >
                               <FileText className="w-3 h-3" />
-                              <span>Factuur</span>
+                              <span>Factuur niet beschikbaar</span>
                             </button>
 
                             <button

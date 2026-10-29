@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { PageRoute } from './types';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -14,12 +14,12 @@ import { SuitesPage } from './pages/SuitesPage';
 import { ArrangementsPage } from './pages/ArrangementsPage';
 import { SustainabilityPage } from './pages/SustainabilityPage';
 import { EarlyAccessPage } from './pages/EarlyAccessPage';
-import { InvestPage } from './pages/InvestPage';
+const InvestPage = lazy(() => import('./pages/InvestPage').then(module => ({ default: module.InvestPage })));
 import { PartnersPage } from './pages/PartnersPage';
 import { FaqPage } from './pages/FaqPage';
 import { ContactPage } from './pages/ContactPage';
 import { PrivacyPage, CookiesPage } from './pages/PrivacyPage';
-import { AdminPage } from './pages/AdminPage';
+const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
 
 export default function App() {
   const resolvePath = (hashValue: string): PageRoute => {
@@ -107,10 +107,11 @@ export default function App() {
   return (
     <LanguageProvider>
       <div className="min-h-screen flex flex-col bg-[#0B0D0E] text-[#F7F5F1] selection:bg-[#A9875A]/30 selection:text-[#F7F5F1]">
+        <a href="#main-content" className="skip-link" onClick={event => { event.preventDefault(); document.getElementById("main-content")?.focus(); }}>Ga naar de inhoud</a>
         <Header currentPath={currentPath} onNavigate={navigateTo} />
         
-        <main className="flex-grow">
-          {renderPage()}
+        <main id="main-content" tabIndex={-1} className="flex-grow">
+          <Suspense fallback={<p role="status" className="pt-32 px-6">Pagina wordt geladen…</p>}>{renderPage()}</Suspense>
         </main>
 
         <Footer onNavigate={navigateTo} />

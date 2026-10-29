@@ -14,7 +14,7 @@ export const PrivacyPage: React.FC<LegalPageProps> = ({ onNavigate }) => {
           AVG / GDPR Compliance
         </span>
         <h1 className="text-4xl sm:text-5xl font-serif text-[#F7F5F1]">Privacyverklaring</h1>
-        <p className="text-xs text-[#A9AAA7]">Laatst bijgewerkt: Augustus 2026</p>
+        <p className="text-xs text-[#A9AAA7]">Laatst bijgewerkt: 13 oktober 2026</p>
       </div>
 
       <div className="space-y-8 text-sm text-[#A9AAA7] leading-relaxed border-t border-white/10 pt-8">
@@ -28,16 +28,17 @@ export const PrivacyPage: React.FC<LegalPageProps> = ({ onNavigate }) => {
         <section className="space-y-3">
           <h2 className="text-xl font-serif text-[#F7F5F1]">2. Welke gegevens wij verzamelen via Early Access</h2>
           <p>
-            Tijdens onze pre-launch verzamelen wij uitsluitend de minimaal noodzakelijke gegevens via ons 3-staps registratieformulier:
+            Tijdens onze pre-launch verzamelen wij uitsluitend de minimaal noodzakelijke gegevens via ons aanvraagformulier:
           </p>
           <ul className="list-disc pl-5 space-y-1 text-xs">
             <li>Voornaam (om u persoonlijk te adresseren in pre-launch updates)</li>
-            <li>E-mailadres (om u de locatiereveal, openingsdata en 48u boekingsvoorrang te sturen)</li>
-            <li>Woonplaats / Regio (om de geografische vraag voor toekomstige suite-locaties in kaart te brengen)</li>
-            <li>Voorkeur voor ervaringscategorie en prijsbereidheid (voor statistische optimalisatie van de eerste suite)</li>
+            <li>E-mailadres (om te informeren over uw aanvraag, ontwikkeling en toekomstige opening; zonder gegarandeerde korting of boekingsvoorrang)</li>
+            <li>Soort aanvraag, toestemming en ontvangstdatum</li>
+            <li>Aanvraagreferentie (om dubbele aanvragen bij opnieuw proberen te voorkomen)</li>
           </ul>
         </section>
 
+        <p>Een aanvraag wordt alleen als ontvangen getoond na bevestigde opslag op de server. Zonder beschikbare serveropslag wordt geen ontvangst bevestigd. Het contactformulier maakt uitsluitend een e-mailconcept in uw eigen e-mailprogramma; u verstuurt dit zelf.</p>
         <section className="space-y-3">
           <h2 className="text-xl font-serif text-[#F7F5F1]">3. Geen verkoop aan derden</h2>
           <p>
@@ -64,7 +65,7 @@ export const CookiesPage: React.FC<LegalPageProps> = ({ onNavigate }) => {
           Cookie Transparantie
         </span>
         <h1 className="text-4xl sm:text-5xl font-serif text-[#F7F5F1]">Cookiebeleid</h1>
-        <p className="text-xs text-[#A9AAA7]">Laatst bijgewerkt: Augustus 2026</p>
+        <p className="text-xs text-[#A9AAA7]">Laatst bijgewerkt: 13 oktober 2026</p>
       </div>
 
       <div className="space-y-8 text-sm text-[#A9AAA7] leading-relaxed border-t border-white/10 pt-8">

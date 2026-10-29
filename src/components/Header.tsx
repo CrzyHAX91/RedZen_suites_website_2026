@@ -1,3 +1,4 @@
+import { BOOKING_VIEW } from '../data/bookingStatus';
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Menu, X, Shield, Lock, ChevronRight } from 'lucide-react';
 import { PageRoute } from '../types';
@@ -20,6 +21,39 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') { setMobileMenuOpen(false); document.getElementById('mobile-menu-button')?.focus(); } };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, []);
+
+  useEffect(() => { setMobileMenuOpen(false); }, [currentPath]);
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const main = document.getElementById('main-content');
+    const footer = document.querySelector('footer');
+    const priorOverflow = document.body.style.overflow;
+    if (main) main.inert = true;
+    if (footer) footer.inert = true;
+    document.body.style.overflow = 'hidden';
+    const trap = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(document.querySelectorAll<HTMLElement>('header button, #mobile-navigation button'))
+        .filter(element => element.getClientRects().length > 0 && !element.hasAttribute('disabled'));
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    const resize = () => { if (window.innerWidth >= 1280) setMobileMenuOpen(false); };
+    window.addEventListener('keydown', trap); window.addEventListener('resize', resize);
+    return () => {
+      if (main) main.inert = false;
+      if (footer) footer.inert = false;
+      document.body.style.overflow = priorOverflow;
+      window.removeEventListener('keydown', trap); window.removeEventListener('resize', resize);
+    };
+  }, [mobileMenuOpen]);
 
   const navLinks: { label: string; path: PageRoute }[] = [
     { label: 'Het Concept', path: '/concept' },
@@ -70,12 +104,13 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
           </button>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-7 text-xs uppercase tracking-widest font-medium">
+          <nav className="hidden xl:flex items-center space-x-3 text-xs uppercase tracking-widest font-medium">
             {navLinks.map((link) => {
               const isActive = currentPath === link.path;
               return (
                 <button
                   key={link.path}
+                  aria-current={isActive ? "page" : undefined}
                   id={`nav-link-${link.path.replace('/', '') || 'home'}`}
                   type="button"
                   onClick={() => handleNavClick(link.path)}
@@ -115,10 +150,10 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
               type="button"
               id="header-cta-early-access"
               onClick={() => handleNavClick('/early-access')}
-              className="py-2.5 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-[#C5A069] via-[#A9875A] to-[#B91C1C] text-[#F7F5F1] font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:brightness-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(185,28,28,0.3)] cursor-pointer"
+              className="hidden sm:flex py-2.5 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-[#C5A069] via-[#A9875A] to-[#B91C1C] text-[#F7F5F1] font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:brightness-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(185,28,28,0.3)] cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5 text-rose-200" />
-              <span>Reserveer Jouw Date • €50 Privilege</span>
+              <span>{BOOKING_VIEW.primaryLabel}</span>
             </button>
 
             {/* Mobile menu trigger */}
@@ -126,8 +161,10 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
               type="button"
               id="mobile-menu-button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2.5 rounded-xl bg-[#15191A] border border-white/10 text-[#F7F5F1] hover:text-[#A9875A] transition-colors cursor-pointer"
-              aria-label="Toggle Navigation Menu"
+              className="xl:hidden p-2.5 rounded-xl bg-[#15191A] border border-white/10 text-[#F7F5F1] hover:text-[#A9875A] transition-colors cursor-pointer"
+              aria-label={mobileMenuOpen ? "Menu sluiten" : "Menu openen"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -138,7 +175,7 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden bg-[#0B0D0E]/98 backdrop-blur-2xl pt-24 px-6 pb-10 flex flex-col justify-between overflow-y-auto">
+        <div id="mobile-navigation" role="navigation" aria-label="Mobiele navigatie" className="fixed inset-0 z-40 xl:hidden bg-[#0B0D0E]/98 backdrop-blur-2xl pt-24 px-6 pb-10 flex flex-col justify-between overflow-y-auto">
           <div className="space-y-4">
             <div className="pb-4 border-b border-white/10">
               <div className="text-xs font-mono uppercase tracking-widest text-[#A9875A] mb-1">
@@ -195,7 +232,7 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
               className="w-full py-4 rounded-xl bg-gradient-to-r from-[#A9875A] to-[#C5A069] text-[#0B0D0E] font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Join Early Access (€50 Korting)</span>
+              <span>{BOOKING_VIEW.primaryLabel}</span>
             </button>
 
             <div className="flex items-center justify-between text-xs text-[#A9AAA7] px-2 pt-2">
