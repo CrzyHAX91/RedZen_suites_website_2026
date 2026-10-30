@@ -18,7 +18,18 @@ async function fixture(t: TestContext, onRequestEnd?: () => void) {
   const dir = await mkdtemp(path.join(tmpdir(), 'redzen-dependencies-'));
   const app = createApp(dir);
   const server = createServer((req, res) => {
-    if (req.method === 'POST') req.once('end', () => onRequestEnd?.());
+    if (req.method === 'POST' && onRequestEnd) {
+      req.once('end', onRequestEnd);
+      // Keep the response open for a downstream consumer of the whole request,
+      // as in the upstream regression. Headers release the client's late tail.
+      const end = res.end;
+      res.end = function (...args: any[]) {
+        res.flushHeaders();
+        if (req.readableEnded) Reflect.apply(end, res, args);
+        else req.once('end', () => Reflect.apply(end, res, args));
+        return res;
+      } as typeof res.end;
+    }
     app(req, res);
   });
   server.listen(0, '127.0.0.1');
@@ -56,7 +67,7 @@ for (const [label, api] of [
   });
 }
 
-test('production parsers preserve URL-encoded intake and reject duplicate email values', { timeout: 8000 }, async t => {
+test('production parsers reject invalid URL-encoded intake and preserve Unicode JSON intake', { timeout: 8000 }, async t => {
   const { base, dir } = await fixture(t);
   const body = new URLSearchParams({ ...lead, consent: 'true' });
   // HTML form booleans are strings; the existing API correctly refuses them.
