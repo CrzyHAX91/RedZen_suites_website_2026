@@ -1,20 +1,13 @@
-import express from 'express';
 import path from 'path';
+import express from 'express';
 import { createServer as createViteServer } from 'vite';
-import { interestRoutes } from './server/interestRoutes';
+import { createApp } from './server/app';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const app = express();
+const app = createApp();
 const PORT = 3000;
-
-app.use(express.json({ limit: '16kb' }));
-app.use(express.urlencoded({ extended: true }));
-
-app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
-app.use('/api', interestRoutes());
-app.use('/api', (_req, res) => res.status(404).json({ status: 'not_found' }));
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
@@ -37,3 +30,4 @@ async function startServer() {
 }
 
 startServer();
+
