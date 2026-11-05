@@ -23,4 +23,11 @@ jobs:
       - run: npm test
       - run: npm run lint
       - run: npm run build
+      - name: Verify Vercel client build with a synthetic project target (no deployment)
+        run: npm run build:vercel
+        env:
+          VERCEL: '1'
+          VERCEL_ENV: preview
+          VERCEL_PROJECT_ID: prj_RedZenTest
+          REDZEN_VERCEL_PROJECT_ID: prj_RedZenTest
 

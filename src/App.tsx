@@ -5,7 +5,6 @@ import { Footer } from './components/Footer';
 import { CookieBanner } from './components/CookieBanner';
 import { SoundscapePlayer } from './components/SoundscapePlayer';
 import { LanguageProvider } from './context/LanguageContext';
-import { startDriveCronWorker, stopDriveCronWorker } from './services/driveBackupCron';
 
 // Pages
 import { HomePage } from './pages/HomePage';
@@ -19,7 +18,6 @@ import { PartnersPage } from './pages/PartnersPage';
 import { FaqPage } from './pages/FaqPage';
 import { ContactPage } from './pages/ContactPage';
 import { PrivacyPage, CookiesPage } from './pages/PrivacyPage';
-const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
 
 export default function App() {
   const resolvePath = (hashValue: string): PageRoute => {
@@ -51,9 +49,6 @@ export default function App() {
   });
 
   useEffect(() => {
-    // Start periodic background Drive cron worker
-    startDriveCronWorker();
-
     const handleHashChange = () => {
       const resolved = resolvePath(window.location.hash);
       setCurrentPath(resolved);
@@ -62,7 +57,6 @@ export default function App() {
     window.addEventListener('hashchange', handleHashChange);
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
-      stopDriveCronWorker();
     };
   }, []);
 
@@ -97,7 +91,7 @@ export default function App() {
       case '/cookies':
         return <CookiesPage onNavigate={navigateTo} />;
       case '/admin':
-        return <AdminPage onNavigate={navigateTo} />;
+        return <p className="pt-32 px-6">Beheer is momenteel niet beschikbaar.</p>;
       case '/':
       default:
         return <HomePage onNavigate={navigateTo} />;
