@@ -1,5 +1,11 @@
 # RedZen booking status and rollout — updated 25 October 2026
 
+> Hosting follow-up, 5 November 2026: the owner selected a separate Vercel project
+> with durable PostgreSQL storage (option B). See [VERCEL_ROLLOUT.md](VERCEL_ROLLOUT.md)
+> for current alias evidence, implementation, validation limits and approval gates.
+> This document's October hosting observation remains historical; no hosting change
+> or deployment is implied by the code preparation.
+
 ## Verified inputs
 
 Repository base: `eea72c91f33bfa12bf3d969e5ae3f3d0f8c2e924`.

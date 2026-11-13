@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm ci --engine-strict --no-audit --no-fund",
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "dist",
+  "regions": ["fra1"],
+  "git": { "deploymentEnabled": false },
+  "functions": { "api/*.ts": { "maxDuration": 15 } },
+  "routes": [
+    { "src": "/api/interest/?", "dest": "/api/interest" },
+    { "src": "/api/health/?", "dest": "/api/health" },
+    { "src": "/api/ready/?", "dest": "/api/ready" },
+    { "src": "/api/(?:leads(?:/.*)?|send-reservation-receipt)/?", "dest": "/api/closed" },
+    { "src": "/api(?:/.*)?", "dest": "/api/not-found" },
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
+  ]
+}

@@ -7,7 +7,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = createApp();
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error('Invalid PORT');
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
