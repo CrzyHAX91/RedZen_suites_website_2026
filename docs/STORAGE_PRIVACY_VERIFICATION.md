@@ -20,6 +20,10 @@
   configured application, rate-bucket and backup retention days (1..3650), a
   reviewed privacy setup and the existing separate-project/enablement guards.
   No retention duration is silently selected as business policy.
+- Public property/investor forms prepare a mailto draft, with no browser lead
+  storage or claim of receipt. The visitor sends the message themselves. A static
+  build gate rejects legacy browser lead-storage keys in any public JS chunk,
+  keeping the associated seed records out of the public bundle.
 - Privacy copy discloses pseudonymous IP hashes, withdrawal, processors and the
   backup deletion limitation. This is technical preparation, not a legal review
   or proof of an operational privacy process.
@@ -39,6 +43,12 @@ role membership rejection, database stop/start, committed-data persistence,
 pg_dump/restore into a fresh database, restored permissions, and maintenance
 preview/deletion restrictions. The HTTP adapter uses the real handler, store and
 SQL; it does not simulate Vercel/Neon networking or prove deployed routing.
+
+The browser-smoke job exercises lazy route navigation on desktop and mobile
+viewports, deferred downloads and synthetic failed/successful intake responses.
+It blocks all external requests and never writes to the live intake. A local
+browser attempt was blocked by sandbox Unix-socket restrictions; CI provides
+browser execution evidence instead.
 
 Local ordinary tests run PGlite and are separate evidence. A real PostgreSQL CI
 result must be inspected before claiming the Linux integration suite passed.
