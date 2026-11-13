@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageRoute } from '../types';
-import { savePropertyLead } from '../services/leadStorage';
 import { 
   Building2, 
   MapPin, 
@@ -27,26 +26,15 @@ export const PartnersPage: React.FC<PartnersPageProps> = ({ onNavigate }) => {
   const [size, setSize] = useState('');
   const [description, setDescription] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !propertyLocation || !size) return;
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      savePropertyLead({
-        name,
-        company,
-        email,
-        phone,
-        propertyLocation,
-        size,
-        description
-      });
-      setIsSubmitting(false);
-      setSubmitted(true);
-    }, 400);
+    const details = { name, company, email, phone, propertyLocation, size, description };
+    const body = Object.entries(details).map(([key, value]) => `${key}: ${value}`).join('\n');
+    window.location.href = `mailto:info@redzen-suites.nl?subject=${encodeURIComponent('Vastgoedvoorstel RedZen Suites')}&body=${encodeURIComponent(body)}`;
+    setSubmitted(true);
   };
 
   return (
@@ -139,9 +127,9 @@ export const PartnersPage: React.FC<PartnersPageProps> = ({ onNavigate }) => {
               <div className="w-14 h-14 rounded-full bg-[#1C2224] border border-[#A9875A] flex items-center justify-center mx-auto text-[#A9875A]">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
-              <h3 className="text-2xl font-serif text-[#F7F5F1]">Vastgoeddossier Ontvangen</h3>
+              <h3 className="text-2xl font-serif text-[#F7F5F1]">E-mailconcept voorbereid</h3>
               <p className="text-sm text-[#A9AAA7] max-w-md mx-auto">
-                Hartelijk dank {name}. Wij nemen binnen 48 uur contact op over de locatie in {propertyLocation}.
+                Controleer en verstuur het concept in uw eigen e-mailprogramma. Ontvangst door RedZen is nog niet bevestigd.
               </p>
               <button
                 type="button"
@@ -153,6 +141,7 @@ export const PartnersPage: React.FC<PartnersPageProps> = ({ onNavigate }) => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              <p className="text-sm text-[#A9AAA7]">Dit formulier bereidt een e-mailconcept voor. Uw invoer wordt niet in deze browser opgeslagen en is pas verzonden als u zelf de e-mail verstuurt.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
@@ -257,10 +246,9 @@ export const PartnersPage: React.FC<PartnersPageProps> = ({ onNavigate }) => {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
                 className="w-full py-4 rounded-xl bg-gradient-to-r from-[#A9875A] to-[#C5A069] text-[#0B0D0E] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:brightness-110 shadow-lg cursor-pointer transition-all"
               >
-                {isSubmitting ? 'Verwerken...' : 'Verstuur Vastgoedaanmelding'}
+                Open e-mailconcept
               </button>
             </form>
           )}

@@ -23,12 +23,12 @@ export interface InterestStore {
 export function createPostgresInterestStore(query: Query): InterestStore {
   return {
     async ready() {
-      const rows = await query('SELECT redzen_private.intake_ready() AS ready');
+      const rows = await query('SELECT redzen_private.intake_ready(2) AS ready');
       return rows.length === 1 && rows[0].ready === true;
     },
     async put(record) {
       const rows = await query(
-        'SELECT * FROM redzen_private.submit_interest($1, $2, $3, $4, $5, $6)',
+        'SELECT * FROM redzen_private.submit_interest_v2($1, $2, $3, $4, $5, $6)',
         [record.id, record.fingerprint, record.kind, record.name, record.email, record.clientHash],
       );
       if (rows.length !== 1) throw new Error('Intake unavailable');

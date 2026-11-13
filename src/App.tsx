@@ -8,16 +8,17 @@ import { LanguageProvider } from './context/LanguageContext';
 
 // Pages
 import { HomePage } from './pages/HomePage';
-import { ConceptPage } from './pages/ConceptPage';
-import { SuitesPage } from './pages/SuitesPage';
-import { ArrangementsPage } from './pages/ArrangementsPage';
-import { SustainabilityPage } from './pages/SustainabilityPage';
-import { EarlyAccessPage } from './pages/EarlyAccessPage';
+const ConceptPage = lazy(() => import('./pages/ConceptPage').then(module => ({ default: module.ConceptPage })));
+const SuitesPage = lazy(() => import('./pages/SuitesPage').then(module => ({ default: module.SuitesPage })));
+const ArrangementsPage = lazy(() => import('./pages/ArrangementsPage').then(module => ({ default: module.ArrangementsPage })));
+const SustainabilityPage = lazy(() => import('./pages/SustainabilityPage').then(module => ({ default: module.SustainabilityPage })));
+const EarlyAccessPage = lazy(() => import('./pages/EarlyAccessPage').then(module => ({ default: module.EarlyAccessPage })));
 const InvestPage = lazy(() => import('./pages/InvestPage').then(module => ({ default: module.InvestPage })));
-import { PartnersPage } from './pages/PartnersPage';
-import { FaqPage } from './pages/FaqPage';
-import { ContactPage } from './pages/ContactPage';
-import { PrivacyPage, CookiesPage } from './pages/PrivacyPage';
+const PartnersPage = lazy(() => import('./pages/PartnersPage').then(module => ({ default: module.PartnersPage })));
+const FaqPage = lazy(() => import('./pages/FaqPage').then(module => ({ default: module.FaqPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then(module => ({ default: module.ContactPage })));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(module => ({ default: module.PrivacyPage })));
+const CookiesPage = lazy(() => import('./pages/PrivacyPage').then(module => ({ default: module.CookiesPage })));
 
 export default function App() {
   const resolvePath = (hashValue: string): PageRoute => {

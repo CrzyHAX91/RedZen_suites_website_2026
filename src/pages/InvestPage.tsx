@@ -1,7 +1,6 @@
 import { PRICE_LABEL } from '../data/bookingStatus';
 import React, { useState } from 'react';
 import { PageRoute } from '../types';
-import { saveInvestorLead } from '../services/leadStorage';
 import { InvestorRoiCalculator } from '../components/InvestorRoiCalculator';
 import { MicroLoanCreditDossier } from '../components/MicroLoanCreditDossier';
 import { FriendsAndFamilyCalculator } from '../components/FriendsAndFamilyCalculator';
@@ -30,25 +29,15 @@ export const InvestPage: React.FC<InvestPageProps> = ({ onNavigate }) => {
   const [ticketRange, setTicketRange] = useState('€2.500 (Gold Founder)');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email) return;
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      saveInvestorLead({
-        name,
-        companyOrType: `${companyOrType || 'Groene Investeerder'} (${investorCategory})`,
-        email,
-        phone,
-        ticketRange,
-        message
-      });
-      setIsSubmitting(false);
-      setSubmitted(true);
-    }, 400);
+    const details = { name, companyOrType, email, phone, investorCategory, ticketRange, message };
+    const body = Object.entries(details).map(([key, value]) => `${key}: ${value}`).join('\n');
+    window.location.href = `mailto:info@redzen-suites.nl?subject=${encodeURIComponent('Investeringsvraag RedZen Suites')}&body=${encodeURIComponent(body)}`;
+    setSubmitted(true);
   };
 
   return (
@@ -230,9 +219,9 @@ export const InvestPage: React.FC<InvestPageProps> = ({ onNavigate }) => {
               <div className="w-14 h-14 rounded-full bg-[#1C2224] border border-[#A9875A] flex items-center justify-center mx-auto text-[#A9875A]">
                 <FileText className="w-7 h-7" />
               </div>
-              <h3 className="text-2xl font-serif text-[#F7F5F1]">Aanvraag Ontvangen</h3>
+              <h3 className="text-2xl font-serif text-[#F7F5F1]">E-mailconcept voorbereid</h3>
               <p className="text-sm text-[#A9AAA7] max-w-md mx-auto">
-                Dank {name}. Wij nemen binnen 24 uur discreet contact op met het groene investeringsmemorandum, subsidiedossier en NDA-link.
+                Controleer en verstuur het concept in uw eigen e-mailprogramma. Ontvangst door RedZen is nog niet bevestigd.
               </p>
               <button
                 type="button"
@@ -244,6 +233,7 @@ export const InvestPage: React.FC<InvestPageProps> = ({ onNavigate }) => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              <p className="text-sm text-[#A9AAA7]">Dit formulier bereidt een e-mailconcept voor. Uw invoer wordt niet in deze browser opgeslagen en is pas verzonden als u zelf de e-mail verstuurt.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[#A9AAA7] uppercase tracking-wider mb-1.5">
@@ -358,15 +348,14 @@ export const InvestPage: React.FC<InvestPageProps> = ({ onNavigate }) => {
 
               <div className="flex items-center gap-2 text-xs text-[#A9AAA7] pt-1">
                 <Lock className="w-3.5 h-3.5 text-[#A9875A]" />
-                <span>Gegevens worden strikt vertrouwelijk en conform AVG behandeld.</span>
+                <span>Verstuur het e-mailconcept zelf vanuit uw eigen e-mailprogramma.</span>
               </div>
 
               <button
                 type="submit"
-                disabled={isSubmitting}
                 className="w-full py-4 rounded-xl bg-gradient-to-r from-[#A9875A] to-[#C5A069] text-[#0B0D0E] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:brightness-110 shadow-lg cursor-pointer transition-all"
               >
-                {isSubmitting ? 'Verzenden...' : 'Verstuur Vertrouwelijke Groene Aanvraag'}
+                Open e-mailconcept
               </button>
             </form>
           )}

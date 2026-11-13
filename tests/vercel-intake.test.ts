@@ -11,10 +11,12 @@ import { createIntakeHandler } from '../server/vercelIntake';
 import { BADDBEATZ_PROJECT_ID, validHostingTarget } from '../server/hostingTarget';
 
 const migration = await readFile(new URL('../db/migrations/001_private_intake.sql', import.meta.url), 'utf8');
+const hardening = await readFile(new URL('../db/migrations/002_intake_concurrency_and_retention.sql', import.meta.url), 'utf8');
 const hash = (s: string) => createHash('sha256').update(s).digest('hex');
 const env = {
   VERCEL: '1', VERCEL_ENV: 'preview', VERCEL_PROJECT_ID: 'prj_RedZenTest',
-  REDZEN_VERCEL_PROJECT_ID: 'prj_RedZenTest', REDZEN_INTAKE_ENABLED: 'true',
+  REDZEN_VERCEL_PROJECT_ID: 'prj_RedZenTest', REDZEN_INTAKE_ENABLED: 'true', REDZEN_PRIVACY_READY: 'true',
+  REDZEN_APPLICATION_RETENTION_DAYS: '30', REDZEN_RATE_BUCKET_RETENTION_DAYS: '2', REDZEN_BACKUP_RETENTION_DAYS: '7',
   REDZEN_RATE_LIMIT_SECRET: hash('synthetic test-only rate-limit seed'),
 };
 const input = { kind: 'interest', name: 'Test Guest', email: 'guest@example.com', consent: true };
@@ -27,10 +29,63 @@ function request(body: unknown = input, key = 'test-request-00000001', headers: 
 async function database(dir?: string) {
   const db = await PGlite.create(dir);
   await db.exec(migration);
+  await db.exec(hardening);
   await db.exec('SET SESSION AUTHORIZATION redzen_intake');
   const store = createPostgresInterestStore(async (sql, values = []) => (await db.query(sql, values)).rows as Record<string, unknown>[]);
   return { db, store, handle: createIntakeHandler('interest', { env, store: () => store }) };
 }
+
+test('SECURITY DEFINER checks use real catalogs despite temporary role and membership shadows', async t => {
+  const db = await PGlite.create();
+  try {
+    await db.exec(migration);
+    await db.exec(hardening);
+    await db.exec('CREATE ROLE shadow_test_group; GRANT shadow_test_group TO redzen_intake, redzen_maintenance');
+    const store = createPostgresInterestStore(async (sql, values = []) =>
+      (await db.query(sql, values)).rows as Record<string, unknown>[]);
+    const record = { id: hash('shadow-test'), fingerprint: hash('shadow-test'), kind: 'interest' as const,
+      name: 'Synthetic Guest', email: 'guest@example.com', clientHash: hash('shadow-client') };
+    const expirySql = 'SELECT * FROM redzen_private.expire_intake($1,$2,$3)';
+    const cutoffs = [new Date(Date.now() - 30 * 86400000), new Date(Date.now() - 2 * 86400000)];
+    for (const role of ['redzen_intake', 'redzen_maintenance']) {
+      await t.test(role, async () => {
+        await db.exec(`SET SESSION AUTHORIZATION ${role}`);
+        try {
+          // The restricted caller owns these objects. Hide real memberships and role flags.
+          await db.exec(`
+            CREATE TEMP TABLE pg_roles AS SELECT * FROM pg_catalog.pg_roles;
+            CREATE TEMP TABLE pg_auth_members AS SELECT * FROM pg_catalog.pg_auth_members WITH NO DATA;
+            UPDATE pg_temp.pg_roles SET rolsuper=false, rolcreatedb=false, rolcreaterole=false, rolbypassrls=false;
+            GRANT SELECT ON pg_temp.pg_roles, pg_temp.pg_auth_members TO PUBLIC;
+          `);
+          assert.equal((await db.query<{n: number}>(`SELECT count(*)::int AS n FROM pg_catalog.pg_auth_members
+            WHERE member = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = session_user)`)).rows[0].n, 1);
+          if (role === 'redzen_intake') {
+            assert.equal(await store.ready(), false, 'temporary catalogs must not hide a real membership');
+            await assert.rejects(store.put(record), /restricted runtime role/);
+          } else {
+            await assert.rejects(db.query(expirySql, [...cutoffs, false]), /independent maintenance role/);
+          }
+          // Conversely, forged administrative flags must not reject a genuinely restricted login.
+          await db.exec(`SET SESSION AUTHORIZATION postgres; REVOKE shadow_test_group FROM ${role};
+            SET SESSION AUTHORIZATION ${role};
+            UPDATE pg_temp.pg_roles SET rolsuper=true, rolcreatedb=true, rolcreaterole=true, rolbypassrls=true`);
+          if (role === 'redzen_intake') {
+            assert.equal(await store.ready(), true);
+            await assert.rejects(store.put({ ...record, name: '' }), /Invalid application/);
+          } else {
+            const rows = (await db.query<{applications: number | string; rate_buckets: number | string}>(expirySql, [...cutoffs, true])).rows;
+            assert.equal(Number(rows[0].applications), 0);
+            assert.equal(Number(rows[0].rate_buckets), 0);
+          }
+        } finally {
+          await db.exec('SET SESSION AUTHORIZATION postgres; DROP TABLE IF EXISTS pg_temp.pg_roles, pg_temp.pg_auth_members');
+        }
+      });
+    }
+    assert.equal((await db.query<{n: number}>('SELECT count(*)::int AS n FROM redzen_private.interest_requests')).rows[0].n, 0);
+  } finally { await db.close(); }
+});
 
 test('real PostgreSQL migration: private RPC-only access, inputs, retry and conflict behavior', async () => {
   const { db, store, handle } = await database();
@@ -50,7 +105,7 @@ test('real PostgreSQL migration: private RPC-only access, inputs, retry and conf
     await assert.rejects(db.query('SELECT * FROM redzen_private.interest_requests'), /permission denied/);
     await assert.rejects(db.query('DELETE FROM redzen_private.interest_requests'), /permission denied/);
     await assert.rejects(db.query('INSERT INTO redzen_private.interest_requests(id) VALUES ($1)', [hash('denied')]), /permission denied/);
-    await assert.rejects(db.query('SELECT * FROM redzen_private.submit_interest($1,$2,$3,$4,$5,$6)',
+    await assert.rejects(db.query('SELECT * FROM redzen_private.submit_interest_v2($1,$2,$3,$4,$5,$6)',
       [hash('invalid'), hash('invalid'), 'paid-booking', 'Guest', 'guest@example.com', hash('client')]), /Invalid application/);
     // PGlite does not restore the initial principal with RESET SESSION AUTHORIZATION.
     await db.exec("SET SESSION AUTHORIZATION 'postgres'");
@@ -104,7 +159,8 @@ test('SQL idempotency survives queued requests and reopening a persisted Postgre
 test('intake fails closed on wrong project, no enablement, no storage, and failed readiness', async () => {
   for (const change of [ { VERCEL_PROJECT_ID: BADDBEATZ_PROJECT_ID, REDZEN_VERCEL_PROJECT_ID: BADDBEATZ_PROJECT_ID },
     { REDZEN_VERCEL_PROJECT_ID: '' }, { REDZEN_INTAKE_ENABLED: 'false' }, { REDZEN_INTAKE_ENABLED: 'TRUE' },
-    { VERCEL_ENV: 'development' }, { REDZEN_RATE_LIMIT_SECRET: '' } ]) {
+    { VERCEL_ENV: 'development' }, { REDZEN_PRIVACY_READY: 'false' },
+    { REDZEN_APPLICATION_RETENTION_DAYS: '0' }, { REDZEN_BACKUP_RETENTION_DAYS: '' }, { REDZEN_RATE_LIMIT_SECRET: '' } ]) {
     const handler = createIntakeHandler('interest', { env: { ...env, ...change } });
     assert.equal((await handler(request())).status, 503);
   }
