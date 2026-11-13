@@ -51,7 +51,10 @@ export function createIntakeHandler(endpoint: Endpoint, options: {
     const env = options.env ?? process.env;
     if (!validHostingTarget(env)) return json(unavailable, 503);
     if (endpoint === 'health') return json({ status: 'ok' });
-    if (env.REDZEN_INTAKE_ENABLED !== 'true' || !env.REDZEN_RATE_LIMIT_SECRET ||
+    if (env.REDZEN_INTAKE_ENABLED !== 'true' || env.REDZEN_PRIVACY_READY !== 'true' ||
+        !['REDZEN_APPLICATION_RETENTION_DAYS', 'REDZEN_RATE_BUCKET_RETENTION_DAYS', 'REDZEN_BACKUP_RETENTION_DAYS']
+          .every(key => /^[1-9][0-9]{0,3}$/.test(env[key] || '') && Number(env[key]) <= 3650) ||
+        !env.REDZEN_RATE_LIMIT_SECRET ||
         env.REDZEN_RATE_LIMIT_SECRET.length < 32) return json(unavailable, 503);
     try {
       if (endpoint === 'ready') {

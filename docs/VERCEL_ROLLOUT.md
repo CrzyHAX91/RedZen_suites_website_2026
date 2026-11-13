@@ -1,3 +1,8 @@
+> Follow-up: see [STORAGE_PRIVACY_VERIFICATION.md](STORAGE_PRIVACY_VERIFICATION.md)
+> for mandatory migration 002, version-2 RPCs, privacy configuration and the
+> isolated Linux PostgreSQL tests. The original November 5 validation below
+> predates that follow-up and is not evidence for its final commit.
+
 # RedZen Vercel rollout - option B
 
 Selected by the owner on 5 November 2026. This is code preparation, not authorization
