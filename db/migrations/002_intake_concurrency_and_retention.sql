@@ -5,19 +5,20 @@ UPDATE redzen_private.schema_version SET version = 2;
 ALTER TABLE redzen_private.schema_version ADD CONSTRAINT schema_version_version_check CHECK (version = 2);
 DROP FUNCTION redzen_private.submit_interest(text,text,text,text,text,text);
 DROP FUNCTION redzen_private.intake_ready();
+-- Pin role checks to real catalogs; caller-owned temporary objects must not shadow them.
 CREATE FUNCTION redzen_private.submit_interest_v2(
   p_id text, p_fingerprint text, p_kind text, p_name text, p_email text, p_client_hash text
 ) RETURNS TABLE (status text, id text, kind text)
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog AS $$
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
   previous redzen_private.interest_requests%ROWTYPE;
   attempts integer;
   saved redzen_private.interest_requests%ROWTYPE;
 BEGIN
   IF session_user <> 'redzen_intake' OR
-     EXISTS (SELECT 1 FROM pg_roles WHERE rolname = session_user AND
+     EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = session_user AND
        (rolsuper OR rolcreatedb OR rolcreaterole OR rolbypassrls)) OR
-     EXISTS (SELECT 1 FROM pg_auth_members WHERE member = (SELECT oid FROM pg_roles WHERE rolname = session_user)) THEN
+     EXISTS (SELECT 1 FROM pg_catalog.pg_auth_members WHERE member = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = session_user)) THEN
     RAISE EXCEPTION 'Use the restricted runtime role';
   END IF;
   IF p_id IS NULL OR p_id !~ '^[a-f0-9]{64}$' OR
@@ -61,12 +62,12 @@ BEGIN
 END $$;
 
 CREATE OR REPLACE FUNCTION redzen_private.intake_ready(required_version integer) RETURNS boolean
-LANGUAGE sql SECURITY DEFINER SET search_path = pg_catalog AS $$
+LANGUAGE sql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
   SELECT required_version = 2 AND EXISTS (SELECT 1 FROM redzen_private.schema_version WHERE version = 2)
     AND session_user = 'redzen_intake'
-    AND NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = session_user AND
+    AND NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = session_user AND
       (rolsuper OR rolcreatedb OR rolcreaterole OR rolbypassrls))
-    AND NOT EXISTS (SELECT 1 FROM pg_auth_members WHERE member = (SELECT oid FROM pg_roles WHERE rolname = session_user))
+    AND NOT EXISTS (SELECT 1 FROM pg_catalog.pg_auth_members WHERE member = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = session_user))
 $$;
 
 
@@ -75,20 +76,20 @@ GRANT EXECUTE ON FUNCTION redzen_private.submit_interest_v2(text,text,text,text,
 REVOKE ALL ON FUNCTION redzen_private.intake_ready(integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION redzen_private.intake_ready(integer) TO redzen_intake;
 DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'redzen_maintenance') THEN
+  IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'redzen_maintenance') THEN
     CREATE ROLE redzen_maintenance NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
   END IF;
 END $$;
 CREATE FUNCTION redzen_private.expire_intake(
   application_before timestamptz, bucket_before timestamptz, dry_run boolean DEFAULT true
 ) RETURNS TABLE (applications bigint, rate_buckets bigint)
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog AS $$
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE app_count bigint; bucket_count bigint;
 BEGIN
   IF session_user <> 'redzen_maintenance' OR
-     EXISTS (SELECT 1 FROM pg_roles WHERE rolname = session_user AND
+     EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = session_user AND
        (rolsuper OR rolcreatedb OR rolcreaterole OR rolbypassrls)) OR
-     EXISTS (SELECT 1 FROM pg_auth_members WHERE member = (SELECT oid FROM pg_roles WHERE rolname = session_user)) THEN
+     EXISTS (SELECT 1 FROM pg_catalog.pg_auth_members WHERE member = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = session_user)) THEN
     RAISE EXCEPTION 'Use the independent maintenance role';
   END IF;
   IF application_before IS NULL OR bucket_before IS NULL OR dry_run IS NULL OR

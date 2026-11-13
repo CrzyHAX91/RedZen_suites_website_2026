@@ -73,6 +73,53 @@ test('real PostgreSQL: permissions, independent concurrency, outage, restart, re
     assert.equal(await store.ready(), true);
   });
 
+  await t.test('temporary catalog objects cannot hide memberships or forge administrative flags', async t => {
+    await owner.query('CREATE ROLE shadow_test_group; GRANT shadow_test_group TO redzen_intake, redzen_maintenance');
+    try {
+      for (const role of ['redzen_intake', 'redzen_maintenance']) {
+        await t.test(role, async () => {
+          // Dedicated sessions keep caller-owned temp objects alive across actual RPC calls.
+          const session = new pg.Client({ ...config, user: role });
+          await session.connect();
+          try {
+            await session.query(`
+              CREATE TEMP TABLE pg_roles AS SELECT * FROM pg_catalog.pg_roles;
+              CREATE TEMP TABLE pg_auth_members AS SELECT * FROM pg_catalog.pg_auth_members WITH NO DATA;
+              UPDATE pg_temp.pg_roles SET rolsuper=false, rolcreatedb=false, rolcreaterole=false, rolbypassrls=false;
+              GRANT SELECT ON pg_temp.pg_roles, pg_temp.pg_auth_members TO PUBLIC;
+            `);
+            assert.equal((await session.query(`SELECT count(*)::int AS n FROM pg_catalog.pg_auth_members
+              WHERE member = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = session_user)`)).rows[0].n, 1);
+            const shadowStore = createPostgresInterestStore(async (sql, values = []) => (await session.query(sql, values)).rows);
+            const record = { id: hash('shadow-test'), fingerprint: hash('shadow-test'), kind: 'interest' as const,
+              name: 'Synthetic Guest', email: 'guest@example.com', clientHash: hash('shadow-client') };
+            const expirySql = 'SELECT * FROM redzen_private.expire_intake($1,$2,$3)';
+            const cutoffs = [new Date(Date.now() - 30 * 86400000), new Date(Date.now() - 2 * 86400000)];
+            if (role === 'redzen_intake') {
+              assert.equal(await shadowStore.ready(), false, 'temporary catalogs must not hide a real membership');
+              await assert.rejects(shadowStore.put(record), /restricted runtime role/);
+            } else {
+              await assert.rejects(session.query(expirySql, [...cutoffs, false]), /independent maintenance role/);
+            }
+            await owner.query(`REVOKE shadow_test_group FROM ${role}`);
+            await session.query('UPDATE pg_temp.pg_roles SET rolsuper=true, rolcreatedb=true, rolcreaterole=true, rolbypassrls=true');
+            if (role === 'redzen_intake') {
+              assert.equal(await shadowStore.ready(), true);
+              await assert.rejects(shadowStore.put({ ...record, name: '' }), /Invalid application/);
+            } else {
+              const result = (await session.query(expirySql, [...cutoffs, true])).rows[0];
+              assert.equal(Number(result.applications), 0);
+              assert.equal(Number(result.rate_buckets), 0);
+            }
+          } finally { await session.end(); }
+        });
+      }
+    } finally {
+      await owner.query('REVOKE shadow_test_group FROM redzen_intake, redzen_maintenance; DROP ROLE shadow_test_group');
+    }
+    assert.equal((await owner.query('SELECT count(*)::int AS n FROM redzen_private.interest_requests')).rows[0].n, 0);
+  });
+
   await t.test('40 independent-session retries store one record and consume one rate slot', async () => {
     const pids = await Promise.all(Array.from({ length: 40 }, () => runtime.query('SELECT pg_backend_pid() AS pid, pg_sleep(0.05)')));
     assert.ok(new Set(pids.map(r => r.rows[0].pid)).size > 1);

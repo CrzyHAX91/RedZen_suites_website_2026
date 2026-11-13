@@ -35,6 +35,58 @@ async function database(dir?: string) {
   return { db, store, handle: createIntakeHandler('interest', { env, store: () => store }) };
 }
 
+test('SECURITY DEFINER checks use real catalogs despite temporary role and membership shadows', async t => {
+  const db = await PGlite.create();
+  try {
+    await db.exec(migration);
+    await db.exec(hardening);
+    await db.exec('CREATE ROLE shadow_test_group; GRANT shadow_test_group TO redzen_intake, redzen_maintenance');
+    const store = createPostgresInterestStore(async (sql, values = []) =>
+      (await db.query(sql, values)).rows as Record<string, unknown>[]);
+    const record = { id: hash('shadow-test'), fingerprint: hash('shadow-test'), kind: 'interest' as const,
+      name: 'Synthetic Guest', email: 'guest@example.com', clientHash: hash('shadow-client') };
+    const expirySql = 'SELECT * FROM redzen_private.expire_intake($1,$2,$3)';
+    const cutoffs = [new Date(Date.now() - 30 * 86400000), new Date(Date.now() - 2 * 86400000)];
+    for (const role of ['redzen_intake', 'redzen_maintenance']) {
+      await t.test(role, async () => {
+        await db.exec(`SET SESSION AUTHORIZATION ${role}`);
+        try {
+          // The restricted caller owns these objects. Hide real memberships and role flags.
+          await db.exec(`
+            CREATE TEMP TABLE pg_roles AS SELECT * FROM pg_catalog.pg_roles;
+            CREATE TEMP TABLE pg_auth_members AS SELECT * FROM pg_catalog.pg_auth_members WITH NO DATA;
+            UPDATE pg_temp.pg_roles SET rolsuper=false, rolcreatedb=false, rolcreaterole=false, rolbypassrls=false;
+            GRANT SELECT ON pg_temp.pg_roles, pg_temp.pg_auth_members TO PUBLIC;
+          `);
+          assert.equal((await db.query<{n: number}>(`SELECT count(*)::int AS n FROM pg_catalog.pg_auth_members
+            WHERE member = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = session_user)`)).rows[0].n, 1);
+          if (role === 'redzen_intake') {
+            assert.equal(await store.ready(), false, 'temporary catalogs must not hide a real membership');
+            await assert.rejects(store.put(record), /restricted runtime role/);
+          } else {
+            await assert.rejects(db.query(expirySql, [...cutoffs, false]), /independent maintenance role/);
+          }
+          // Conversely, forged administrative flags must not reject a genuinely restricted login.
+          await db.exec(`SET SESSION AUTHORIZATION postgres; REVOKE shadow_test_group FROM ${role};
+            SET SESSION AUTHORIZATION ${role};
+            UPDATE pg_temp.pg_roles SET rolsuper=true, rolcreatedb=true, rolcreaterole=true, rolbypassrls=true`);
+          if (role === 'redzen_intake') {
+            assert.equal(await store.ready(), true);
+            await assert.rejects(store.put({ ...record, name: '' }), /Invalid application/);
+          } else {
+            const rows = (await db.query<{applications: number | string; rate_buckets: number | string}>(expirySql, [...cutoffs, true])).rows;
+            assert.equal(Number(rows[0].applications), 0);
+            assert.equal(Number(rows[0].rate_buckets), 0);
+          }
+        } finally {
+          await db.exec('SET SESSION AUTHORIZATION postgres; DROP TABLE IF EXISTS pg_temp.pg_roles, pg_temp.pg_auth_members');
+        }
+      });
+    }
+    assert.equal((await db.query<{n: number}>('SELECT count(*)::int AS n FROM redzen_private.interest_requests')).rows[0].n, 0);
+  } finally { await db.close(); }
+});
+
 test('real PostgreSQL migration: private RPC-only access, inputs, retry and conflict behavior', async () => {
   const { db, store, handle } = await database();
   try {
