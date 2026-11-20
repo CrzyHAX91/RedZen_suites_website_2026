@@ -28,6 +28,17 @@ const env = { VERCEL: '1', VERCEL_ENV: 'preview', VERCEL_PROJECT_ID: 'prj_RedZen
 const store = createPostgresInterestStore(async (sql, values = []) => (await runtime.query(sql, values)).rows);
 const handler = createIntakeHandler('interest', { env, store: () => store });
 const input = { kind: 'interest', name: 'Synthetic Guest', email: 'guest@example.com', consent: true };
+const permissionAudit = await readFile(new URL('../db/checks/intake_permissions.sql', import.meta.url), 'utf8');
+async function auditDatabase(database = config.database) {
+  const client = new pg.Client({ ...config, database, user: 'postgres' });
+  await client.connect();
+  try {
+    await client.query('BEGIN READ ONLY');
+    const rows = (await client.query(permissionAudit)).rows;
+    assert.equal(rows.length, 11);
+    assert.ok(rows.every(row => row.passed === true), JSON.stringify(rows));
+  } finally { await client.query('ROLLBACK'); await client.end(); }
+}
 
 test('real PostgreSQL: permissions, independent concurrency, outage, restart, restore and retention', { timeout: 180000 }, async t => {
   t.after(async () => { await Promise.all([owner.end(), runtime.end(), maintenance.end()]); });
@@ -35,6 +46,7 @@ test('real PostgreSQL: permissions, independent concurrency, outage, restart, re
     await owner.query(await readFile(new URL('../db/migrations/' + file, import.meta.url), 'utf8'));
   }
   await owner.query('ALTER ROLE redzen_intake LOGIN; ALTER ROLE redzen_maintenance LOGIN; CREATE ROLE redzen_anonymous LOGIN');
+  await t.test('independent catalog audit passes in an actual read-only transaction', () => auditDatabase());
   // Test adapter exercises real HTTP and the actual handler/store/SQL. It is not Vercel transport.
   const server = createServer(async (req, res) => {
     try {
@@ -141,6 +153,7 @@ test('real PostgreSQL: permissions, independent concurrency, outage, restart, re
     const dump = docker('exec', container!, 'pg_dump', '-U', 'postgres', '-d', 'redzen_ci');
     await owner.query('CREATE DATABASE redzen_ci_restore');
     execFileSync('docker', ['exec', '-i', container!, 'psql', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres', '-d', 'redzen_ci_restore'], { input: dump, stdio: ['pipe', 'ignore', 'pipe'], timeout: 30000 });
+    await auditDatabase('redzen_ci_restore');
     const restored = new pg.Pool({ ...config, database: 'redzen_ci_restore', user: 'redzen_intake' });
     try {
       const restoredStore = createPostgresInterestStore(async (sql, values = []) => (await restored.query(sql, values)).rows);
